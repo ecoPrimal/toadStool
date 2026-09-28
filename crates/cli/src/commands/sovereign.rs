@@ -19,22 +19,28 @@
 //! including the display GPU. This matters most for the K80s, which sit behind
 //! PLX switches.
 
-use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::UnixStream;
-use std::time::Duration;
-
 use crate::Result;
 
 use super::definitions::SovereignCommand;
 
+#[cfg(unix)]
+use std::io::{BufRead, BufReader, Write};
+#[cfg(unix)]
+use std::os::unix::net::UnixStream;
+#[cfg(unix)]
+use std::time::Duration;
+
 /// Every connection must announce itself per the riboCipher transport
 /// standard; the server rejects unsignalled connections.
+#[cfg(unix)]
 const RIBOCIPHER_PREFIX: [u8; 2] = [0xEC, 0x01];
 
 /// Longer than the server's own 420s warm-handoff timeout, so the server's
 /// error surfaces rather than the client giving up first.
+#[cfg(unix)]
 const RPC_TIMEOUT: Duration = Duration::from_secs(480);
 
+#[cfg(unix)]
 fn socket_path() -> String {
     if let Ok(explicit) = std::env::var("TOADSTOOL_COMPUTE_SOCK") {
         return explicit;
@@ -45,6 +51,7 @@ fn socket_path() -> String {
 }
 
 /// Issue a single JSON-RPC call over the compute socket.
+#[cfg(unix)]
 fn rpc(method: &str, params: serde_json::Value) -> Result<serde_json::Value> {
     let path = socket_path();
     let stream = UnixStream::connect(&path).map_err(|e| {
@@ -94,6 +101,7 @@ fn rpc(method: &str, params: serde_json::Value) -> Result<serde_json::Value> {
         .unwrap_or(serde_json::Value::Null))
 }
 
+#[cfg(unix)]
 fn print_steps(result: &serde_json::Value) {
     let Some(steps) = result.get("steps").and_then(|s| s.as_array()) else {
         return;
@@ -114,6 +122,7 @@ fn print_steps(result: &serde_json::Value) {
 }
 
 /// Report the tier without letting an unmeasured device look like a verdict.
+#[cfg(unix)]
 fn print_tier(result: &serde_json::Value) {
     let Some(tier) = result.get("tier") else {
         return;
@@ -153,6 +162,16 @@ fn print_tier(result: &serde_json::Value) {
     }
 }
 
+#[cfg(not(unix))]
+pub async fn execute_sovereign_command(_cmd: SovereignCommand) -> Result<()> {
+    Err(crate::CliError::Other(
+        "Sovereign GPU commands require Unix domain sockets — not available on Windows. \
+         Use TCP-based toadstool-server RPC instead."
+            .into(),
+    ))
+}
+
+#[cfg(unix)]
 pub async fn execute_sovereign_command(cmd: SovereignCommand) -> Result<()> {
     match cmd {
         SovereignCommand::Handoff {

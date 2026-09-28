@@ -11,6 +11,25 @@ use crate::pure_jsonrpc::types::JsonRpcError;
 
 use super::DispatchHandler;
 
+/// Stub PCIe link type for non-Linux platforms where sysfs is unavailable.
+/// Matches the field interface of `toadstool_display::pcie_transport::PcieLink`.
+#[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
+struct PcieLinkStub {
+    source: PcieEndpointStub,
+    target: PcieEndpointStub,
+    bandwidth_bps: u64,
+    hops: u32,
+    same_numa: bool,
+    contention_factor: f64,
+}
+
+#[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
+struct PcieEndpointStub {
+    card_index: u32,
+}
+
 /// A partition of a lattice assigned to a specific GPU adapter.
 ///
 /// The lattice is split along one axis (typically time for QCD to minimize
@@ -210,8 +229,12 @@ impl DispatchHandler {
                 }
             };
 
-            // Discover PCIe links for inter-partition transport
+            // Discover PCIe links for inter-partition transport.
+            // PCIe topology discovery requires Linux sysfs — empty on other platforms.
+            #[cfg(target_os = "linux")]
             let pcie_links = toadstool_display::pcie_transport::discover_pcie_links();
+            #[cfg(not(target_os = "linux"))]
+            let pcie_links = Vec::<PcieLinkStub>::new();
 
             // Execute steps with halo exchange between them
             let mut step_results = Vec::with_capacity(steps as usize);

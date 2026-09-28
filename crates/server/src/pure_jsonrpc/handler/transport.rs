@@ -38,25 +38,30 @@ impl TransportHandler {
     }
 
     pub(super) fn transport_discover(_params: Option<&serde_json::Value>) -> serde_json::Value {
-        let display = toadstool_display::discover_display_transports();
-        let capture = toadstool_display::discover_capture_transports();
-        let serial = toadstool_display::serial_transport::discover_serial_transports();
-        let pcie = toadstool_display::discover_pcie_transports();
+        #[cfg(target_os = "linux")]
+        let all: Vec<serde_json::Value> = {
+            let display = toadstool_display::discover_display_transports();
+            let capture = toadstool_display::discover_capture_transports();
+            let serial = toadstool_display::serial_transport::discover_serial_transports();
+            let pcie = toadstool_display::discover_pcie_transports();
 
-        let all: Vec<_> = display
-            .iter()
-            .chain(capture.iter())
-            .chain(serial.iter())
-            .chain(pcie.iter())
-            .map(|t| {
-                serde_json::json!({
-                    "id": t.id,
-                    "label": t.label,
-                    "medium": format!("{}", t.medium),
-                    "direction": format!("{}", t.direction),
+            display
+                .iter()
+                .chain(capture.iter())
+                .chain(serial.iter())
+                .chain(pcie.iter())
+                .map(|t| {
+                    serde_json::json!({
+                        "id": t.id,
+                        "label": t.label,
+                        "medium": format!("{}", t.medium),
+                        "direction": format!("{}", t.direction),
+                    })
                 })
-            })
-            .collect();
+                .collect()
+        };
+        #[cfg(not(target_os = "linux"))]
+        let all: Vec<serde_json::Value> = Vec::new();
 
         serde_json::json!({"transports": all, "count": all.len()})
     }
@@ -120,6 +125,7 @@ impl TransportHandler {
     /// Register a discovered `PCIe` transport into the router by its link endpoints.
     ///
     /// Params: `{ "source_slot": "0000:25:00.0", "target_slot": "0000:41:00.0" }`
+    #[cfg(target_os = "linux")]
     pub(super) async fn transport_open(
         &self,
         params: Option<&serde_json::Value>,
@@ -162,6 +168,17 @@ impl TransportHandler {
             "bandwidth_bps": bandwidth,
             "status": "registered"
         }))
+    }
+
+    /// PCIe transport not available on this platform.
+    #[cfg(not(target_os = "linux"))]
+    pub(super) async fn transport_open(
+        &self,
+        _params: Option<&serde_json::Value>,
+    ) -> Result<serde_json::Value, JsonRpcError> {
+        Err(JsonRpcError::internal_error(
+            "PCIe transport discovery requires Linux sysfs — not available on this platform",
+        ))
     }
 
     /// Start continuous streaming between two registered transports.
