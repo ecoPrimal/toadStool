@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::net::{TcpListener, TcpStream, UnixListener, UnixStream};
+use tokio::net::{TcpListener, TcpStream};
 use tracing::info;
 
 use toadstool::{
@@ -115,10 +115,13 @@ pub async fn run_byob_server(config: ByobServerConfig) -> ToadStoolResult<()> {
 }
 
 /// Serve BYOB API over a Unix domain socket.
+#[cfg(unix)]
 async fn serve_unix<E: toadstool::byob::ByobExecutor + Send + Sync + 'static>(
     api: Arc<ByobApi<E>>,
     path: PathBuf,
 ) -> ToadStoolResult<()> {
+    use tokio::net::UnixListener;
+
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).map_err(|e| {
             ToadStoolError::runtime(format!("Failed to create socket directory: {e}"))
@@ -143,6 +146,18 @@ async fn serve_unix<E: toadstool::byob::ByobExecutor + Send + Sync + 'static>(
             Err(e) => tracing::error!("Unix accept error: {e}"),
         }
     }
+}
+
+/// UDS transport not available on this platform — use TCP fallback.
+#[cfg(not(unix))]
+async fn serve_unix<E: toadstool::byob::ByobExecutor + Send + Sync + 'static>(
+    _api: Arc<ByobApi<E>>,
+    path: PathBuf,
+) -> ToadStoolResult<()> {
+    Err(ToadStoolError::runtime(format!(
+        "UDS transport not available on this platform (requested: {}). Use TCP fallback.",
+        path.display()
+    )))
 }
 
 /// Serve BYOB API over TCP.
@@ -170,9 +185,10 @@ async fn serve_tcp<E: toadstool::byob::ByobExecutor + Send + Sync + 'static>(
     }
 }
 
+#[cfg(unix)]
 async fn handle_unix_connection<E: toadstool::byob::ByobExecutor + Send + Sync + 'static>(
     api: Arc<ByobApi<E>>,
-    stream: UnixStream,
+    stream: tokio::net::UnixStream,
 ) -> ToadStoolResult<()> {
     let (reader, mut writer) = stream.into_split();
     let mut reader = BufReader::new(reader);
