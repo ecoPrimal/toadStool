@@ -82,6 +82,50 @@ pub const AKD1000_TOTAL_MACS: u32 =
     MeshTopology::AKD1000.functional * AKD1000_NP.npus_per_node * AKD1000_NP.macs_per_npu;
 // = 78 × 4 × 128 = 39,936
 
+// ── Akida 2.0 (AKD2500) — pre-silicon placeholders ──────────────────────────
+//
+// Source: Akida 2 IP Product Brief v2.0 (April 2025), ASX announcement Feb 2026.
+// These values are from the IP specification, not from silicon measurement.
+// Update when AKD2500 tape-out (Dec 2026) produces real numbers.
+
+/// Akida 2 IP capability profile (from product brief v2.0).
+///
+/// Scalable from 1–128 nodes. Each node has 128 8×8 MAC engines.
+/// Supports 8/4/1-bit weights and activations.
+pub const AKIDA2_NP: NpCapabilities = NpCapabilities {
+    npus_per_node: 1, // Akida 2 treats each node as one processing element
+    macs_per_npu: 128, // 128 MAC engines (8×8 MACs each = 8192 MACs at 64-node)
+    sram_per_npu_kb_min: 50,
+    sram_per_npu_kb_max: 130,
+    weight_bits: &[1, 4, 8],
+    activation_bits: &[1, 4, 8],
+};
+
+/// Akida 2 TOPS at max config (128 nodes, 1 GHz): 16 TOPS.
+/// Source: Akida 2 IP Product Brief scalability table.
+pub const AKIDA2_MAX_TOPS: f64 = 16.0;
+
+// ── Akida Pico — ultra-low-power NPU core ────────────────────────────────────
+//
+// Source: Akida Pico Product Brief v1.3 (Feb 2026).
+// Standalone event-based NPU: µW active power, TENNs processing.
+
+/// Akida Pico capability profile.
+pub const PICO_NP: NpCapabilities = NpCapabilities {
+    npus_per_node: 1, // single Neural Processing Engine
+    macs_per_npu: 1, // event-based, not MAC-based in the traditional sense
+    sram_per_npu_kb_min: 296, // 74K words × 4 bytes
+    sram_per_npu_kb_max: 296,
+    weight_bits: &[4, 8],
+    activation_bits: &[4, 8],
+};
+
+/// Akida Pico die area at 22nm process (mm²).
+pub const PICO_DIE_AREA_MM2: f64 = 0.145;
+
+/// Akida Pico gate count (base configuration).
+pub const PICO_GATE_COUNT: u32 = 160_000;
+
 /// `SkipDMA` — NP-to-NP data routing without `PCIe` round-trip.
 ///
 /// Discovered by C++ engine symbol analysis (Discovery 2 and 9).
@@ -142,5 +186,31 @@ mod tests {
     fn np_capabilities_weight_and_activation_bits() {
         assert_eq!(AKD1000_NP.weight_bits, &[1, 2, 4]);
         assert_eq!(AKD1000_NP.activation_bits, &[1, 2, 4]);
+    }
+
+    #[test]
+    fn akida2_adds_8_bit_support() {
+        assert!(AKIDA2_NP.weight_bits.contains(&8));
+        assert!(AKIDA2_NP.activation_bits.contains(&8));
+        assert_eq!(AKIDA2_NP.macs_per_npu, 128);
+    }
+
+    #[test]
+    fn akida2_max_tops_from_product_brief() {
+        assert!((AKIDA2_MAX_TOPS - 16.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn pico_is_ultra_low_power() {
+        assert_eq!(PICO_NP.npus_per_node, 1);
+        assert!(PICO_NP.weight_bits.contains(&4));
+        assert!(PICO_NP.weight_bits.contains(&8));
+        assert_eq!(PICO_NP.sram_per_npu_kb_min, 296);
+    }
+
+    #[test]
+    fn pico_die_area_sub_0_2_mm2() {
+        assert!(PICO_DIE_AREA_MM2 < 0.2);
+        assert!(PICO_GATE_COUNT == 160_000);
     }
 }
