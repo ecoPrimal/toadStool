@@ -4,7 +4,7 @@
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::discovery_defaults::DiscoveryConfig;
+use crate::discovery_defaults::{DiscoveryConfig, DiscoveryConfigExt};
 use crate::primal_identity::{Capability, CryptoCapability};
 
 use super::config::capability_from_str;

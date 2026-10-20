@@ -63,13 +63,15 @@ async fn test_cache_stats() {
 
 #[tokio::test]
 async fn test_clear_cache() {
-    let mut config = DiscoveryConfig::default();
-    config.fallbacks.insert(
-        "orchestration".to_string(),
-        "http://localhost:9998".to_string(),
-    );
-    config.enable_mdns = false;
-    config.require_mdns = false;
+    let config = DiscoveryConfig {
+        fallbacks: {
+            let mut m = HashMap::new();
+            m.insert("orchestration".to_string(), "http://localhost:9998".to_string());
+            m
+        },
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("Failed to create engine");
 
@@ -87,17 +89,11 @@ async fn test_clear_cache() {
 
 #[tokio::test]
 async fn test_discovery_config_default_with_env() {
-    temp_env::with_vars(
-        [
-            ("TOADSTOOL_MDNS_ENABLE", Some("false")),
-            ("TOADSTOOL_MDNS_REQUIRE", Some("true")),
-        ],
-        || {
-            let config = DiscoveryConfig::default();
-            assert!(!config.enable_mdns);
-            assert!(config.require_mdns);
-        },
-    );
+    let config = DiscoveryConfig::default();
+    // Canonical config does not have enable_mdns/require_mdns.
+    // Methods list controls discovery; verify defaults are present.
+    assert!(!config.methods.is_empty());
+    assert!(config.cache_enabled);
 }
 
 #[tokio::test]
@@ -115,7 +111,7 @@ async fn test_cache_stats_stale_entries() {
     };
 
     let config = DiscoveryConfig {
-        cache_ttl: Duration::ZERO,
+        cache_ttl_secs: 0,
         ..Default::default()
     };
 
@@ -180,10 +176,11 @@ async fn test_capability_to_string_crypto_auth_discovery_custom() {
 
 #[tokio::test]
 async fn test_cache_stats_empty() {
-    let mut config = DiscoveryConfig::default();
-    config.fallbacks.clear();
-    config.enable_mdns = false;
-    config.require_mdns = false;
+    let config = DiscoveryConfig {
+        fallbacks: HashMap::new(),
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("Failed to create engine");
 
@@ -196,8 +193,8 @@ async fn test_cache_stats_empty() {
 #[tokio::test]
 async fn test_discovery_config_default_fallbacks() {
     let config = DiscoveryConfig::default();
-    assert!(config.cache_ttl.as_secs() > 0);
-    assert!(config.health_check_interval.as_secs() > 0);
+    assert!(config.cache_ttl_secs > 0);
+    assert!(config.interval_secs > 0);
 }
 
 #[tokio::test]
@@ -214,10 +211,11 @@ async fn test_cached_endpoint_is_fresh() {
         metadata: HashMap::new(),
     };
 
-    let mut config = DiscoveryConfig::default();
-    config.fallbacks.clear();
-    config.enable_mdns = false;
-    config.require_mdns = false;
+    let config = DiscoveryConfig {
+        fallbacks: HashMap::new(),
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("Failed to create engine");
 
@@ -233,10 +231,11 @@ async fn test_cached_endpoint_is_fresh() {
     reason = "test validates cache behavior under lock — intentional hold across await"
 )]
 async fn test_cache_stats_multiple_entries() {
-    let mut config = DiscoveryConfig::default();
-    config.fallbacks.clear();
-    config.enable_mdns = false;
-    config.require_mdns = false;
+    let config = DiscoveryConfig {
+        fallbacks: HashMap::new(),
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("create engine");
 
@@ -261,13 +260,14 @@ async fn test_cache_stats_multiple_entries() {
     reason = "test validates cache behavior under lock — intentional hold across await"
 )]
 async fn test_cached_endpoint_stale_after_ttl() {
-    let mut config = DiscoveryConfig::default();
-    config.fallbacks.clear();
-    config.enable_mdns = false;
-    config.require_mdns = false;
-    // Duration::ZERO makes cache immediately stale; no sleep needed (cache uses std::time::Instant,
+    // cache_ttl_secs=0 makes cache immediately stale; no sleep needed (cache uses std::time::Instant,
     // which tokio virtual time cannot advance)
-    config.cache_ttl = Duration::ZERO;
+    let config = DiscoveryConfig {
+        fallbacks: HashMap::new(),
+        methods: vec!["env".into()],
+        cache_ttl_secs: 0,
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("create");
 
@@ -289,8 +289,8 @@ async fn test_cached_endpoint_stale_after_ttl() {
 #[tokio::test]
 async fn test_discovery_config_cache_and_health_intervals() {
     let config = DiscoveryConfig::default();
-    assert!(config.cache_ttl.as_secs() >= 1);
-    assert!(config.health_check_interval.as_secs() >= 1);
+    assert!(config.cache_ttl_secs >= 1);
+    assert!(config.interval_secs >= 1);
 }
 
 #[tokio::test]
@@ -338,12 +338,11 @@ async fn test_capability_to_string_all_variants() {
 
 #[tokio::test]
 async fn test_cache_stats_after_clear() {
-    let mut config = DiscoveryConfig::default();
-    config
-        .fallbacks
-        .insert("cap".to_string(), "http://127.0.0.1:9000".to_string());
-    config.enable_mdns = false;
-    config.require_mdns = false;
+    let config = DiscoveryConfig {
+        fallbacks: HashMap::from([("cap".to_string(), "http://127.0.0.1:9000".to_string())]),
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("create");
 
@@ -378,22 +377,21 @@ fn test_cache_stats_debug_clone() {
 #[test]
 fn test_discovery_config_default() {
     let config = super::super::DiscoveryConfig::default();
-    assert!(config.cache_ttl.as_secs() >= 1);
-    assert!(config.health_check_interval.as_secs() >= 1);
+    assert!(config.cache_ttl_secs >= 1);
+    assert!(config.interval_secs >= 1);
 }
 
 #[test]
 fn test_discovery_config_custom() {
-    use std::time::Duration;
     let config = super::super::DiscoveryConfig {
-        cache_ttl: Duration::from_mins(10),
-        health_check_interval: Duration::from_mins(1),
+        cache_ttl_secs: 600,
+        interval_secs: 60,
         fallbacks: std::collections::HashMap::new(),
-        enable_mdns: false,
-        require_mdns: false,
+        methods: vec!["env".into()],
+        ..super::super::DiscoveryConfig::default()
     };
-    assert_eq!(config.cache_ttl.as_secs(), 600);
-    assert_eq!(config.health_check_interval.as_secs(), 60);
+    assert_eq!(config.cache_ttl_secs, 600);
+    assert_eq!(config.interval_secs, 60);
 }
 
 #[tokio::test]
@@ -410,11 +408,12 @@ async fn test_cached_endpoint_is_fresh_with_nonzero_ttl() {
         metadata: HashMap::new(),
     };
 
-    let mut config = DiscoveryConfig::default();
-    config.fallbacks.clear();
-    config.enable_mdns = false;
-    config.require_mdns = false;
-    config.cache_ttl = std::time::Duration::from_mins(10);
+    let config = DiscoveryConfig {
+        fallbacks: HashMap::new(),
+        methods: vec!["env".into()],
+        cache_ttl_secs: 600,
+        ..DiscoveryConfig::default()
+    };
 
     let engine = PrimalDiscoveryEngine::without_client(config).expect("create");
 

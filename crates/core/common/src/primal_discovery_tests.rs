@@ -4,14 +4,15 @@ use super::*;
 
 #[tokio::test]
 async fn test_discovery_with_fallback() {
-    let mut config = DiscoveryConfig {
-        enable_mdns: false, // Disable mDNS for test
+    let config = DiscoveryConfig {
+        methods: vec!["env".into()],
+        fallbacks: {
+            let mut m = std::collections::HashMap::new();
+            m.insert("orchestration".to_string(), "http://localhost:8080".to_string());
+            m
+        },
         ..Default::default()
     };
-    config.fallbacks.insert(
-        "orchestration".to_string(),
-        "http://localhost:8080".to_string(),
-    );
 
     let discovery = PrimalDiscovery::with_config(config).unwrap();
     let endpoint = discovery.find_capability("orchestration").await.unwrap();
@@ -24,7 +25,7 @@ async fn test_discovery_with_fallback() {
 #[tokio::test]
 async fn test_discovery_not_found() {
     let config = DiscoveryConfig {
-        enable_mdns: false, // Disable mDNS for test
+        methods: vec!["env".into()],
         ..Default::default()
     };
 
@@ -63,13 +64,15 @@ async fn test_cache_freshness() {
 
 #[tokio::test]
 async fn test_refresh_clears_cache() {
-    let mut config = DiscoveryConfig {
-        enable_mdns: false,
+    let config = DiscoveryConfig {
+        methods: vec!["env".into()],
+        fallbacks: {
+            let mut m = std::collections::HashMap::new();
+            m.insert("test".to_string(), "http://localhost:8080".to_string());
+            m
+        },
         ..Default::default()
     };
-    config
-        .fallbacks
-        .insert("test".to_string(), "http://localhost:8080".to_string());
 
     let discovery = PrimalDiscovery::with_config(config).unwrap();
 

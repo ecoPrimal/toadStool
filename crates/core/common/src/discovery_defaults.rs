@@ -378,7 +378,7 @@ mod tests {
         let config = DiscoveryConfig::production();
         let debug_str = format!("{config:?}");
         assert!(debug_str.contains("DiscoveryConfig"));
-        assert!(debug_str.contains("enable_localhost_fallback"));
+        assert!(debug_str.contains("fallbacks"));
     }
 
     #[test]

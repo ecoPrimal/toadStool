@@ -168,8 +168,8 @@ fn test_mdns_adapter_config_accessor() {
     let result = MdnsAdapter::with_timeout(config, Duration::from_millis(100));
     if let Ok(adapter) = result {
         let adapter_config = adapter.config();
-        assert_eq!(adapter_config.cache_ttl, std::time::Duration::from_mins(5));
-        assert!(adapter_config.enable_mdns);
+        assert_eq!(adapter_config.cache_ttl_secs, 60);
+        assert!(adapter_config.methods.contains(&"mdns".to_string()));
     }
 }
 

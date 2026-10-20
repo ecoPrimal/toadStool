@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 use super::*;
-use std::collections::HashMap;
 
 #[test]
 fn test_service_info_creation() {
-    let info = ServiceInfo {
-        name: "test-service".to_string(),
-        capabilities: vec!["compute.native".to_string()],
-        endpoint: format!(
+    let info = ServiceInfo::new("test-service", "test-service")
+        .with_capability("compute.native")
+        .with_endpoint(format!(
             "{}{}:{}",
             toadstool_common::constants::network::HTTP_PROTOCOL,
             toadstool_common::constants::DEFAULT_HOSTNAME,
             8080
-        ),
-        metadata: HashMap::new(),
-    };
+        ));
 
     assert_eq!(info.name, "test-service");
     assert_eq!(info.capabilities.len(), 1);
@@ -23,14 +19,15 @@ fn test_service_info_creation() {
 
 #[test]
 fn test_service_info_with_metadata() {
-    let mut metadata = HashMap::new();
-    metadata.insert("version".to_string(), "1.0".to_string());
-    metadata.insert("region".to_string(), "us-east".to_string());
-    let info = ServiceInfo {
-        name: "storage-svc".to_string(),
-        capabilities: vec!["storage.s3".to_string(), "storage.kv".to_string()],
-        endpoint: "http://localhost:9000".to_string(),
-        metadata,
+    let info = {
+        let mut si = ServiceInfo::new("storage-svc", "storage-svc")
+            .with_capability("storage.s3")
+            .with_capability("storage.kv")
+            .with_endpoint("http://localhost:9000");
+        si.metadata.insert("version".to_string(), "1.0".to_string());
+        si.metadata
+            .insert("region".to_string(), "us-east".to_string());
+        si
     };
     assert_eq!(info.capabilities.len(), 2);
     assert_eq!(info.metadata.get("version"), Some(&"1.0".to_string()));
@@ -101,12 +98,9 @@ async fn test_register_service_no_coordination_returns_err() {
     let factory = AdapterFactory::new();
     let coordination = factory.coordination_adapter().unwrap();
 
-    let service_info = ServiceInfo {
-        name: "test-svc".to_string(),
-        capabilities: vec!["compute.native".to_string()],
-        endpoint: "http://127.0.0.1:9999".to_string(),
-        metadata: HashMap::new(),
-    };
+    let service_info = ServiceInfo::new("test-svc", "test-svc")
+        .with_capability("compute.native")
+        .with_endpoint("http://127.0.0.1:9999");
 
     let result = coordination.register_service(service_info).await;
     assert!(result.is_err());

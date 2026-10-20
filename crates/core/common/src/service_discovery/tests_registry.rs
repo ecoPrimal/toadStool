@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::time::{Duration, SystemTime};
 
-use crate::discovery_defaults::DiscoveryConfig;
+use crate::discovery_defaults::{DiscoveryConfig, DiscoveryConfigExt};
 use crate::primal_identity::Capability;
 
 use super::service::ServiceDiscovery;
@@ -146,7 +146,7 @@ async fn test_find_services_stale_cache_triggers_refresh() {
     let disc = ServiceDiscovery::with_config(
         DiscoveryMethod::ConfigFile { path },
         DiscoveryConfig {
-            cache_ttl: Duration::ZERO,
+            cache_ttl_secs: 0,
             ..DiscoveryConfig::default()
         },
     )

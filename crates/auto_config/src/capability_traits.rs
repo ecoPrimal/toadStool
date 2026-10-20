@@ -245,15 +245,17 @@ mod tests {
         let mut services = std::collections::HashMap::new();
         services.insert(
             "test-svc".to_string(),
-            crate::ecosystem::ServiceInfo {
-                name: "test-svc".to_string(),
-                endpoint: "http://localhost:8080".to_string(),
-                service_type: "Test".to_string(),
-                version: "1.0".to_string(),
-                capabilities: vec!["test".to_string()],
-                status: crate::ecosystem::ServiceStatus::Healthy,
-                discovered_via: "unit_test".to_string(),
-                response_time_ms: 0,
+            {
+                let mut si = crate::ecosystem::ServiceInfo::new("test-svc", "test-svc")
+                    .with_endpoint("http://localhost:8080")
+                    .with_version("1.0")
+                    .with_capability("test");
+                si.status = crate::ecosystem::ServiceStatus::Running;
+                si.metadata.insert("service_type".into(), "Test".into());
+                si.metadata
+                    .insert("discovered_via".into(), "unit_test".into());
+                si.metadata.insert("response_time_ms".into(), "0".into());
+                si
             },
         );
 

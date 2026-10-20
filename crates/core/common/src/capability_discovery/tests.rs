@@ -2,8 +2,6 @@
 
 use super::*;
 use std::path::Path;
-use std::time::Duration;
-
 use crate::interned_strings::socket_env;
 
 /// Isolate localhost fallback from the developer machine: empty runtime dir and no socket env overrides.
@@ -33,20 +31,20 @@ fn with_clean_localhost_fallback_env<F: FnOnce() -> R, R>(runtime: &Path, f: F) 
 #[test]
 fn test_discovery_config_default() {
     let config = DiscoveryConfig::default();
-    assert_eq!(config.timeout, Duration::from_secs(5));
-    // Fallback enabled in non-production
-    assert!(config.enable_localhost_fallback);
+    assert_eq!(config.timeout_secs, 300);
+    // Default methods include mdns
+    assert!(!config.methods.is_empty());
 }
 
 #[test]
 fn test_discovery_config_custom() {
     let config = DiscoveryConfig {
-        timeout: Duration::from_secs(10),
-        enable_localhost_fallback: false,
-        methods: vec![DiscoveryMethod::Mdns],
+        timeout_secs: 10,
+        methods: vec!["mdns".into()],
+        ..DiscoveryConfig::default()
     };
-    assert_eq!(config.timeout, Duration::from_secs(10));
-    assert!(!config.enable_localhost_fallback);
+    assert_eq!(config.timeout_secs, 10);
+    assert!(config.methods.contains(&"mdns".to_string()));
 }
 
 #[test]
@@ -96,7 +94,7 @@ fn test_discovery_error_invalid_config() {
 fn test_discovery_config_production_env() {
     temp_env::with_var("TOADSTOOL_ENV", Some("production"), || {
         let config = DiscoveryConfig::default();
-        assert!(!config.enable_localhost_fallback);
+        assert!(config.fallbacks.is_empty());
     });
 }
 
@@ -104,19 +102,21 @@ fn test_discovery_config_production_env() {
 fn test_discovery_config_development_env() {
     temp_env::with_var_unset("TOADSTOOL_ENV", || {
         let config = DiscoveryConfig::default();
-        assert!(config.enable_localhost_fallback);
+        // Default has no fallbacks (added per-environment)
+        assert!(config.fallbacks.is_empty());
     });
 }
 
 #[test]
 fn test_discovery_config_builder_pattern() {
     let config = DiscoveryConfig {
-        timeout: Duration::from_millis(100),
-        enable_localhost_fallback: true,
-        methods: vec![DiscoveryMethod::Mdns, DiscoveryMethod::Environment],
+        timeout_secs: 0,
+        methods: vec!["mdns".into(), "env".into()],
+        fallbacks: std::collections::HashMap::from([("localhost".into(), "127.0.0.1:8080".into())]),
+        ..DiscoveryConfig::default()
     };
-    assert_eq!(config.timeout, Duration::from_millis(100));
-    assert!(config.enable_localhost_fallback);
+    assert_eq!(config.timeout_secs, 0);
+    assert!(config.fallbacks.contains_key("localhost"));
     assert_eq!(config.methods.len(), 2);
 }
 
@@ -124,11 +124,8 @@ fn test_discovery_config_builder_pattern() {
 fn test_discovery_config_clone() {
     let config1 = DiscoveryConfig::default();
     let config2 = config1.clone();
-    assert_eq!(config1.timeout, config2.timeout);
-    assert_eq!(
-        config1.enable_localhost_fallback,
-        config2.enable_localhost_fallback
-    );
+    assert_eq!(config1.timeout_secs, config2.timeout_secs);
+    assert_eq!(config1.fallbacks, config2.fallbacks);
 }
 
 #[tokio::test]
@@ -142,9 +139,9 @@ async fn test_capability_discovery_new_async_from_spawned_task() {
 #[tokio::test]
 async fn test_capability_discovery_with_config_async() {
     let config = DiscoveryConfig {
-        timeout: Duration::from_millis(50),
-        enable_localhost_fallback: false,
-        methods: vec![DiscoveryMethod::Environment],
+        timeout_secs: 0,
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
     };
     let result = CapabilityDiscovery::with_config_async(&config).await;
     assert!(result.is_ok());
@@ -155,9 +152,9 @@ async fn test_find_by_capability_no_services_in_separate_thread() {
     use crate::primal_identity::{Capability, CryptoCapability};
 
     let config = DiscoveryConfig {
-        timeout: Duration::from_millis(100),
-        enable_localhost_fallback: false,
-        methods: vec![DiscoveryMethod::Environment],
+        timeout_secs: 0,
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
     };
     let discovery = CapabilityDiscovery::with_config_async(&config)
         .await
@@ -209,9 +206,10 @@ async fn test_find_by_capability_with_localhost_fallback() {
         ],
         async {
             let config = DiscoveryConfig {
-                timeout: Duration::from_millis(100),
-                enable_localhost_fallback: true,
-                methods: vec![DiscoveryMethod::Environment],
+                timeout_secs: 0,
+                methods: vec!["env".into()],
+                fallbacks: std::collections::HashMap::from([("localhost".into(), "127.0.0.1:8080".into())]),
+                ..DiscoveryConfig::default()
             };
             let discovery = CapabilityDiscovery::with_config_async(&config)
                 .await
@@ -278,9 +276,9 @@ async fn test_find_best_empty_services_returns_error() {
     use crate::primal_identity::{Capability, CryptoCapability};
 
     let config = DiscoveryConfig {
-        timeout: Duration::from_millis(50),
-        enable_localhost_fallback: false,
-        methods: vec![DiscoveryMethod::Environment],
+        timeout_secs: 0,
+        methods: vec!["env".into()],
+        ..DiscoveryConfig::default()
     };
     let discovery = CapabilityDiscovery::with_config_async(&config)
         .await
@@ -305,8 +303,8 @@ async fn test_find_best_empty_services_returns_error() {
 #[test]
 fn test_discovery_config_default_methods() {
     let config = DiscoveryConfig::default();
-    assert_eq!(config.methods.len(), 1);
-    assert!(matches!(config.methods[0], DiscoveryMethod::Auto));
+    assert!(!config.methods.is_empty());
+    assert!(config.methods.contains(&"mdns".to_string()));
 }
 
 #[test]
@@ -338,9 +336,9 @@ async fn test_capability_discovery_new_async_creates_valid_instance() {
 #[tokio::test]
 async fn test_capability_discovery_with_config_async_succeeds() {
     let config = DiscoveryConfig {
-        timeout: Duration::from_secs(30),
-        enable_localhost_fallback: true,
-        methods: vec![DiscoveryMethod::Auto],
+        timeout_secs: 30,
+        fallbacks: std::collections::HashMap::from([("localhost".into(), "127.0.0.1:8080".into())]),
+        ..DiscoveryConfig::default()
     };
     let discovery = CapabilityDiscovery::with_config_async(&config).await;
     assert!(discovery.is_ok());

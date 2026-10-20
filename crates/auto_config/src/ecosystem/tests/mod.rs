@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Unit tests for ecosystem discovery helpers and [`super::EcosystemDiscoverer`].
 
-use crate::ecosystem_types::{ServiceInfo, ServiceStatus};
+use crate::ecosystem_types::ServiceInfo;
 
 mod discoverer_behaviour;
 mod env_and_merge;
