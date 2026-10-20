@@ -15,7 +15,7 @@ use toadstool_config::env_config::EnvironmentConfig;
 use super::constants::service_names;
 
 use crate::{
-    BiomeNetworking, BiomeResources, BiomeSecurity, BiomeStorage, HealthCheck, PrimalConfig,
+    BiomeNetworking, BiomeResources, BiomeSecurity, BiomeStorage, HealthCheckConfig, PrimalConfig,
     ServiceConfig, ServicePort, ServiceResources, WorkloadSource,
 };
 
@@ -60,7 +60,7 @@ pub fn create_basic_template() -> TemplateComponents {
                 config
             },
             dependencies: vec![],
-            health_check: Some(HealthCheck {
+            health_check: Some(HealthCheckConfig {
                 command: vec!["health-check".to_string()], // Generic health check
                 interval: 30,
                 timeout: 10,
@@ -102,7 +102,7 @@ pub fn create_basic_template() -> TemplateComponents {
             dependencies: vec!["capability:pki".to_string()],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         "curl".to_string(),
                         "-f".to_string(),
@@ -210,7 +210,7 @@ pub fn create_development_template() -> TemplateComponents {
             dependencies: vec!["capability:pki".to_string()],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         "curl".to_string(),
                         "-f".to_string(),

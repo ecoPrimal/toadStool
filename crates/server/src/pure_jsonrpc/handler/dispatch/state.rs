@@ -68,7 +68,7 @@ impl DispatchHandler {
         Option<toadstool_runtime_orchestration::ResourceAllocation>,
         crate::pure_jsonrpc::types::JsonRpcError,
     > {
-        use crate::pure_jsonrpc::types::JsonRpcError;
+        use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
         use toadstool_common::constants::jsonrpc::error_codes;
 
         let Some(orchestrator) = self.resource_orchestrator.as_ref() else {

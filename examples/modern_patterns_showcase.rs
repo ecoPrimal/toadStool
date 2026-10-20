@@ -157,7 +157,6 @@ pub async fn discover_service(capability: &str) -> Result<Vec<String>, Box<dyn s
     );
 
     let discovery = PrimalDiscovery::with_config(DiscoveryConfig {
-        enable_mdns: true,
         fallbacks,
         ..Default::default()
     })?;

@@ -429,28 +429,11 @@ pub trait ToadStoolComputeRpc {
     async fn health_check() -> Result<HealthStatus, ServiceError>;
 }
 
-/// Service health status
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HealthStatus {
-    /// Service is healthy
-    pub healthy: bool,
-    /// Service version (`Arc<str>`: clone on hot paths is a refcount bump, not a string copy)
-    #[serde(
-        serialize_with = "serialize_arc_str",
-        deserialize_with = "deserialize_arc_str"
-    )]
-    pub version: Arc<str>,
-    /// Uptime (seconds)
-    pub uptime_secs: u64,
-    /// Current resource utilization (0.0-1.0)
-    pub resource_utilization: f32,
-    /// Active workloads count
-    pub active_workloads: usize,
-    /// Queued workloads count
-    pub queued_workloads: usize,
-    /// Error count since startup
-    pub error_count: usize,
-}
+// Canonical HealthStatus from cellmembrane-types.
+// Local struct removed — extra fields (version, resource_utilization, active_workloads,
+// queued_workloads, error_count) now stored via the canonical `details` map.
+// Use: HealthStatus::ok().with_uptime(secs).with_detail("version", ver) etc.
+pub use cellmembrane_types::HealthStatus;
 
 #[cfg(test)]
 mod tests {

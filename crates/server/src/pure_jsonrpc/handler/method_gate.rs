@@ -14,7 +14,7 @@
 use serde::{Deserialize, Serialize};
 use tracing::trace;
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Whether a method is freely callable or requires authorization.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

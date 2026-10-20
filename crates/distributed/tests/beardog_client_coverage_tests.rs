@@ -48,7 +48,7 @@ fn parse_capabilities_enhanced() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
 }
 
@@ -61,7 +61,7 @@ fn parse_capabilities_hardware_secured() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::HardwareSecured
+        toadstool::encryption::SecurityLevel::Maximum
     ));
     assert!(cap.hardware_backed);
 }

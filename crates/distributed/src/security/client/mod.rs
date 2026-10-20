@@ -75,11 +75,11 @@ impl SecurityClient {
             .map(|s: &str| match s.to_lowercase().as_str() {
                 "standard" => toadstool::encryption::SecurityLevel::Standard,
                 "hardware_secured" | "hardware" => {
-                    toadstool::encryption::SecurityLevel::HardwareSecured
+                    toadstool::encryption::SecurityLevel::Maximum
                 }
-                _ => toadstool::encryption::SecurityLevel::Enhanced,
+                _ => toadstool::encryption::SecurityLevel::High,
             })
-            .unwrap_or(toadstool::encryption::SecurityLevel::Enhanced);
+            .unwrap_or(toadstool::encryption::SecurityLevel::High);
 
         let hardware_backed = response
             .get("hardware_backed")
@@ -458,7 +458,7 @@ impl SecurityClient {
                 key_name,
                 key_material,
                 algorithm,
-                toadstool::encryption::SecurityLevel::Enhanced,
+                toadstool::encryption::SecurityLevel::High,
             ))
         }
     }

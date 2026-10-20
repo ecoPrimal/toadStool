@@ -11,7 +11,7 @@ use super::super::basic_templates::TemplateComponents;
 use super::super::constants::{
     commands, registries, resource_sizes, service_names, template_names, versions,
 };
-use crate::{HealthCheck, PrimalConfig, ServiceConfig, ServiceResources, WorkloadSource};
+use crate::{HealthCheckConfig, PrimalConfig, ServiceConfig, ServiceResources, WorkloadSource};
 
 /// Create distributed computing cluster template
 pub fn create_distributed_template() -> TemplateComponents {
@@ -39,7 +39,7 @@ pub fn create_distributed_template() -> TemplateComponents {
             dependencies: vec!["capability:pki".to_string()],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         commands::CURL.to_string(),
                         "-f".to_string(),
@@ -74,7 +74,7 @@ pub fn create_distributed_template() -> TemplateComponents {
             dependencies: vec!["capability:pki".to_string()],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         commands::CURL.to_string(),
                         "-f".to_string(),
@@ -118,7 +118,7 @@ pub fn create_distributed_template() -> TemplateComponents {
             ],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         commands::CURL.to_string(),
                         "-f".to_string(),

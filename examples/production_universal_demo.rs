@@ -373,7 +373,7 @@ async fn demo_security_levels(platform: &UniversalComputePlatform) -> ToadStoolR
     println!("{}", "-".repeat(40));
 
     let security_levels = vec![
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -467,7 +467,6 @@ async fn demo_ecosystem_integration(platform: &UniversalComputePlatform) -> Toad
     );
 
     let discovery = PrimalDiscovery::with_config(DiscoveryConfig {
-        enable_mdns: true,
         fallbacks,
         ..Default::default()
     })
@@ -523,7 +522,6 @@ async fn discover_compute_endpoint() -> String {
     );
 
     match PrimalDiscovery::with_config(DiscoveryConfig {
-        enable_mdns: true,
         fallbacks,
         ..Default::default()
     }) {

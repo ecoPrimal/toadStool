@@ -11,6 +11,9 @@ keywords = ["biomeOS", "primals", "orchestration", "integration"]
 categories = ["science", "network-programming"]
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Core dependencies
 serde = { workspace = true }
 serde_json = { workspace = true }

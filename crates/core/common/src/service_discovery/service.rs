@@ -268,7 +268,7 @@ impl ServiceDiscoveryTrait for ServiceDiscovery {
             cache
                 .values()
                 .filter(|s| s.has_capability(capability))
-                .filter(|s| s.is_fresh(self.config.cache_ttl))
+                .filter(|s| s.is_fresh(std::time::Duration::from_secs(self.config.cache_ttl_secs)))
                 .cloned()
                 .collect()
         };
@@ -290,7 +290,7 @@ impl ServiceDiscoveryTrait for ServiceDiscovery {
                 .read()
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
             if let Some(t) = *lr
-                && t.elapsed() < self.config.cache_ttl
+                && t.elapsed() < std::time::Duration::from_secs(self.config.cache_ttl_secs)
             {
                 debug!(
                     "Cache recently refreshed ({}ms ago); skipping re-discovery for {:?}",

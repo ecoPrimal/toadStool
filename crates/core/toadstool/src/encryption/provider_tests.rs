@@ -121,7 +121,7 @@ async fn test_registry_find_provider() {
         id: "test".to_string(),
         capability: CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         },
     });
@@ -273,7 +273,7 @@ async fn test_registry_find_all_providers() {
         id: "p2".to_string(),
         capability: CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string(), "aes-256-gcm".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         },
     });

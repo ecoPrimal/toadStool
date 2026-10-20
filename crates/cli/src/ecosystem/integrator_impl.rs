@@ -204,23 +204,18 @@ impl EcosystemIntegrator {
         let coordination = factory.coordination_adapter()?;
 
         // Build service information
-        let service_info = ServiceInfo {
-            name: toadstool_common::constants::PRIMAL_NAME.to_string(),
-            capabilities: vec![
-                "wasm-execution".to_string(),
-                "container-runtime".to_string(),
-                "universal-substrate".to_string(),
-                "sovereign-compute".to_string(),
-            ],
-            endpoint: endpoint.clone(),
-            metadata: vec![
-                ("version".to_string(), "0.1.0".to_string()),
-                ("platform".to_string(), std::env::consts::OS.to_string()),
-                ("arch".to_string(), std::env::consts::ARCH.to_string()),
-            ]
-            .into_iter()
-            .collect(),
-        };
+        let mut service_info = ServiceInfo::new(
+            toadstool_common::constants::PRIMAL_NAME,
+            toadstool_common::constants::PRIMAL_NAME,
+        )
+        .with_endpoint(endpoint.clone())
+        .with_capability("wasm-execution")
+        .with_capability("container-runtime")
+        .with_capability("universal-substrate")
+        .with_capability("sovereign-compute");
+        service_info.metadata.insert("version".into(), "0.1.0".into());
+        service_info.metadata.insert("platform".into(), std::env::consts::OS.into());
+        service_info.metadata.insert("arch".into(), std::env::consts::ARCH.into());
 
         // Register with coordination service (discovers service dynamically)
         match coordination.register_service(service_info).await {

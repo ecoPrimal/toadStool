@@ -1,29 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 use crate::error::PrimalResult;
-use serde::{Deserialize, Serialize};
 
 /// Service manager for primal services
 pub struct ServiceManager {
     services: std::collections::HashMap<String, ServiceInfo>,
 }
 
-/// Information about a service
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServiceInfo {
-    pub service_id: String,
-    pub service_type: String,
-    pub status: ServiceStatus,
-    pub endpoint: String,
-}
-
-/// Status of a service
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ServiceStatus {
-    Running,
-    Stopped,
-    Error(String),
-    Unknown,
-}
+// Canonical ServiceInfo and ServiceStatus from cellmembrane-types.
+// Local ServiceInfo removed — was {service_id, service_type, status, endpoint}.
+// Canonical uses: {id, name, version, endpoints, capabilities, status, metadata}.
+// Local ServiceStatus removed — was {Running, Stopped, Error(String), Unknown}.
+// Canonical ServiceStatus: {Running, Starting, Stopped, Degraded, Error, Unknown}.
+pub use cellmembrane_types::ServiceInfo;
+pub use cellmembrane_types::EcosystemServiceStatus as ServiceStatus;
 
 impl Default for ServiceManager {
     fn default() -> Self {
@@ -39,27 +28,13 @@ impl ServiceManager {
     }
 
     pub fn start_service(&mut self, service_id: String, service_type: String) -> PrimalResult<()> {
-        // ✅ MODERN: Capability-based service discovery
-        // Instead of hardcoding Coordination port, we discover coordination services by capability
-        //
-        // This follows the self-knowledge principle:
-        // - ToadStool knows only itself
-        // - Other primals are discovered at runtime by what they do (capability)
-        // - No hardcoded primal names or locations
-
         let config = toadstool_config::env_config::EnvironmentConfig::from_env();
         let host = &config.network.bind_address;
-
-        // Self-knowledge: Use OUR OWN port for OUR service endpoint
-        // We don't need to know about Coordination - discovery handles that
         let port = config.network.toadstool_port;
 
-        let service_info = ServiceInfo {
-            service_id: service_id.clone(),
-            service_type,
-            status: ServiceStatus::Running,
-            endpoint: format!("http://{host}:{port}/{service_id}"),
-        };
+        let mut service_info = ServiceInfo::new(&service_id, &service_id)
+            .with_endpoint(format!("http://{host}:{port}/{service_id}"));
+        service_info.metadata.insert("service_type".into(), service_type);
         self.services.insert(service_id, service_info);
         Ok(())
     }

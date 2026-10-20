@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 use super::*;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use serde_json::json;
 use toadstool_core::TransportDirection;
 use toadstool_display::{HardwareTransportDispatch, TestLoopbackTransport};

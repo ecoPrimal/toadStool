@@ -11,7 +11,7 @@ use super::mmio::{
     base64_decode, falcon_bases, falcon_offsets, open_mapped_bar0_rw, open_sysfs_bar0,
     open_sysfs_bar0_rw, parse_base, parse_bdf, parse_u32_param,
 };
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// `mmio.falcon.status` — read falcon microcontroller registers.
 pub fn mmio_falcon_status(params: Option<&Value>) -> Result<Value, JsonRpcError> {

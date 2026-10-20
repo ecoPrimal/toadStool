@@ -7,7 +7,7 @@ use super::submit_params::{
 };
 use super::types::{DispatchJob, DispatchStatus};
 use crate::pure_jsonrpc::handler::method_gate::CallerContext;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use base64::Engine;
 use std::sync::atomic::Ordering;
 

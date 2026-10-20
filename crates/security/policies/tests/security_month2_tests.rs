@@ -14,7 +14,7 @@ use std::collections::HashSet;
 fn test_security_policy_default() {
     let policy = SecurityPolicy::default();
 
-    assert_eq!(policy.level, SecurityLevel::Medium);
+    assert_eq!(policy.level, SecurityLevel::Standard);
     assert!(!policy.allow_network);
     assert!(!policy.allow_filesystem_write);
 }
@@ -23,7 +23,7 @@ fn test_security_policy_default() {
 fn test_security_policy_strict() {
     let policy = SecurityPolicy::strict();
 
-    assert_eq!(policy.level, SecurityLevel::Strict);
+    assert_eq!(policy.level, SecurityLevel::High);
     assert!(!policy.allow_network);
     assert!(!policy.allow_filesystem_write);
     assert!(!policy.allow_process_spawn);
@@ -236,7 +236,7 @@ struct SecurityPolicy {
 impl Default for SecurityPolicy {
     fn default() -> Self {
         Self {
-            level: SecurityLevel::Medium,
+            level: SecurityLevel::Standard,
             allow_network: false,
             allow_filesystem_write: false,
             allow_process_spawn: false,
@@ -251,7 +251,7 @@ impl Default for SecurityPolicy {
 impl SecurityPolicy {
     fn strict() -> Self {
         Self {
-            level: SecurityLevel::Strict,
+            level: SecurityLevel::High,
             ..Default::default()
         }
     }
@@ -330,7 +330,7 @@ impl SecurityPolicy {
     fn blocked_syscalls(&self) -> HashSet<&'static str> {
         let mut blocked = HashSet::new();
 
-        if self.level == SecurityLevel::Strict {
+        if self.level == SecurityLevel::High {
             blocked.insert("execve");
             blocked.insert("ptrace");
             blocked.insert("mount");

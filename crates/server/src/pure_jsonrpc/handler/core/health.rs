@@ -4,7 +4,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use crate::rpc_types::HealthStatus;
 use toadstool_common::constants::PRIMAL_NAME;
 
@@ -74,15 +74,13 @@ pub(crate) async fn health(
         reason = "error count u64→usize is lossless on 64-bit"
     )]
     let error_count_val = error_count.load(Ordering::Relaxed) as usize;
-    let status = HealthStatus {
-        healthy: true,
-        version: Arc::clone(version),
-        uptime_secs: uptime.as_secs(),
-        active_workloads: 0,
-        queued_workloads: 0,
-        error_count: error_count_val,
-        resource_utilization: 0.0,
-    };
+    let status = HealthStatus::ok()
+        .with_uptime(uptime.as_secs())
+        .with_detail("version", serde_json::Value::String(version.to_string()))
+        .with_detail("active_workloads", serde_json::json!(0))
+        .with_detail("queued_workloads", serde_json::json!(0))
+        .with_detail("error_count", serde_json::json!(error_count_val))
+        .with_detail("resource_utilization", serde_json::json!(0.0));
     let mut value = serde_json::to_value(status)
         .map_err(|e| JsonRpcError::internal_error(format!("Serialization error: {e}")))?;
     // Wire Standard L1: biomeOS probes expect "status": "alive"

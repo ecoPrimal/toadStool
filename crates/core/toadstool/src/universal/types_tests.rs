@@ -4,21 +4,21 @@ use super::*;
 
 #[test]
 fn test_security_level_ordering() {
-    assert!(SecurityLevel::Basic < SecurityLevel::Standard);
+    assert!(SecurityLevel::None < SecurityLevel::Standard);
     assert!(SecurityLevel::Standard < SecurityLevel::High);
     assert!(SecurityLevel::High < SecurityLevel::Maximum);
 }
 
 #[test]
 fn test_security_level_equality() {
-    assert_eq!(SecurityLevel::Basic, SecurityLevel::Basic);
-    assert_ne!(SecurityLevel::Basic, SecurityLevel::Maximum);
+    assert_eq!(SecurityLevel::None, SecurityLevel::None);
+    assert_ne!(SecurityLevel::None, SecurityLevel::Maximum);
 }
 
 #[test]
 fn test_security_level_serde_roundtrip() {
     for level in [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,

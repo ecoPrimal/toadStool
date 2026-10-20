@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use tracing::info;
 
-use crate::pure_jsonrpc::types::{JsonRpcError, JsonWorkloadSubmission};
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt, JsonWorkloadSubmission};
 use crate::tarpc_server::WorkloadExecutor;
 
 /// Handles high-level workload execution (toadstool.* namespace).
@@ -184,7 +184,7 @@ mod tests {
     use base64::{Engine as _, engine::general_purpose::STANDARD};
 
     use super::WorkloadHandler;
-    use crate::pure_jsonrpc::types::JsonRpcError;
+    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
     fn handler(double: TestWorkloadDouble) -> WorkloadHandler {
         WorkloadHandler::new(Arc::new(WorkloadExecutorDispatch::TestDouble(double)))

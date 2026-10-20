@@ -1,36 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-use std::time::Duration;
 use thiserror::Error;
 
-use crate::interned_strings::socket_env;
-
-/// Discovery configuration
-#[derive(Debug, Clone)]
-pub struct DiscoveryConfig {
-    /// Discovery timeout
-    pub timeout: Duration,
-
-    /// Enable localhost fallback in development
-    pub enable_localhost_fallback: bool,
-
-    /// Discovery methods to try
-    pub methods: Vec<DiscoveryMethod>,
-}
-
-impl Default for DiscoveryConfig {
-    fn default() -> Self {
-        const DEFAULT_CAPABILITY_DISCOVERY_TIMEOUT_SECS: u64 = 5;
-        let is_production =
-            std::env::var(socket_env::TOADSTOOL_ENV).is_ok_and(|e| e == "production");
-
-        Self {
-            timeout: Duration::from_secs(DEFAULT_CAPABILITY_DISCOVERY_TIMEOUT_SECS),
-            enable_localhost_fallback: !is_production,
-            methods: vec![DiscoveryMethod::Auto],
-        }
-    }
-}
+// Canonical DiscoveryConfig from cellmembrane-types.
+// Local struct removed — was {timeout, enable_localhost_fallback, methods: Vec<DiscoveryMethod>}.
+// Canonical: {methods: Vec<String>, interval_secs, timeout_secs, max_services, cache_enabled, cache_ttl_secs, retries, enable_ipv6, fallbacks}.
+pub use cellmembrane_types::DiscoveryConfig;
 
 /// Discovery methods
 ///

@@ -17,14 +17,14 @@ use toadstool::universal::*;
 fn test_security_level_ordering() {
     assert!(SecurityLevel::Maximum > SecurityLevel::High);
     assert!(SecurityLevel::High > SecurityLevel::Standard);
-    assert!(SecurityLevel::Standard > SecurityLevel::Basic);
+    assert!(SecurityLevel::Standard > SecurityLevel::None);
 }
 
 #[test]
 fn test_security_level_equality() {
-    assert_eq!(SecurityLevel::Basic, SecurityLevel::Basic);
+    assert_eq!(SecurityLevel::None, SecurityLevel::None);
     assert_eq!(SecurityLevel::Maximum, SecurityLevel::Maximum);
-    assert_ne!(SecurityLevel::Basic, SecurityLevel::High);
+    assert_ne!(SecurityLevel::None, SecurityLevel::High);
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn test_security_level_serialization() {
 #[test]
 fn test_security_level_all_variants() {
     let variants = vec![
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -241,7 +241,7 @@ fn test_primal_context_clone() {
         device_id: "device-clone".to_string(),
         session_id: "session-clone".to_string(),
         network_location: location,
-        security_level: SecurityLevel::Basic,
+        security_level: SecurityLevel::None,
         metadata: HashMap::new(),
     };
 

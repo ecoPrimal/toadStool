@@ -5,7 +5,7 @@
 //! binary decoding, workgroup resolution, buffer transform, and shader info mapping.
 
 use crate::pure_jsonrpc::handler::method_gate::CallerContext;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use base64::Engine;
 
 /// Enforce resource envelope limits on a dispatch request (JH-2).
@@ -177,7 +177,7 @@ pub(in crate::pure_jsonrpc::handler::dispatch) fn resource_exhausted(
 ) -> JsonRpcError {
     JsonRpcError {
         code: toadstool_common::constants::jsonrpc::error_codes::RESOURCE_EXHAUSTED,
-        message: std::borrow::Cow::Owned(msg.into()),
+        message: msg.into(),
         data: None,
     }
 }

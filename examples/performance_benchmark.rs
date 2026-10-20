@@ -410,7 +410,7 @@ async fn benchmark_security_overhead(
     println!("{}", "-".repeat(50));
 
     let security_levels = [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,

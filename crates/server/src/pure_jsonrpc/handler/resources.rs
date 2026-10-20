@@ -5,7 +5,7 @@ use crate::resource_estimator::ResourceEstimator;
 use crate::resource_optimizer::ResourceOptimizer;
 use crate::resource_validator::ResourceValidator;
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Handles resource workload operations (estimate, validate, optimize).
 pub(super) struct ResourceHandler {
@@ -87,7 +87,7 @@ impl ResourceHandler {
 #[cfg(test)]
 mod tests {
     use crate::graph_types::{ExecutionGraph, GraphNode};
-    use crate::pure_jsonrpc::types::JsonRpcError;
+    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
     use super::ResourceHandler;
 

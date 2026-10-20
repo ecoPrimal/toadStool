@@ -141,7 +141,7 @@ mod tests {
     fn test_capability_matching() {
         let provided = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string(), "aes-256-gcm".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         };
 
@@ -164,7 +164,7 @@ mod tests {
 
         let required = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         };
 
@@ -175,13 +175,13 @@ mod tests {
     fn test_capability_scoring() {
         let provided = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string(), "aes-256-gcm".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: true,
         };
 
         let required = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: true,
         };
 
@@ -193,7 +193,7 @@ mod tests {
     fn test_capability_no_match_hardware_backed() {
         let provided = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         };
 
@@ -210,7 +210,7 @@ mod tests {
     fn test_capability_no_match_algorithm() {
         let provided = CryptoCapability {
             algorithms: vec!["aes-256-gcm".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         };
 
@@ -231,7 +231,7 @@ mod tests {
                 "aes-256-gcm".to_string(),
                 "xsalsa20".to_string(),
             ],
-            security_level: SecurityLevel::HardwareSecured,
+            security_level: SecurityLevel::Maximum,
             hardware_backed: true,
         };
 
@@ -266,7 +266,7 @@ mod tests {
     fn test_capability_match_score_better_security() {
         let provided = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: false,
         };
 
@@ -352,7 +352,7 @@ mod tests {
     fn test_crypto_service_query_builder_chain() {
         let cap = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: true,
         };
         let query = CryptoServiceQuery::for_capability(cap)
@@ -376,7 +376,7 @@ mod tests {
     fn test_crypto_capability_serialization_roundtrip() {
         let cap = CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string(), "aes-256-gcm".to_string()],
-            security_level: SecurityLevel::Enhanced,
+            security_level: SecurityLevel::High,
             hardware_backed: true,
         };
 

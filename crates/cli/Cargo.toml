@@ -32,6 +32,9 @@ doc = false  # Avoid doc collision with toadstool lib (target/doc/toadstool/inde
 # See: wateringHole/UNIBIN_ARCHITECTURE_STANDARD.md for details.
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Core ToadStool crates
 toadstool = { path = "../core/toadstool" }
 toadstool-common = { path = "../core/common" }

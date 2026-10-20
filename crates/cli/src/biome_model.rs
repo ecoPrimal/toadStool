@@ -70,7 +70,7 @@ pub struct PrimalConfig {
     /// Names of other primals or services this depends on
     pub dependencies: Vec<String>,
     /// Optional health check configuration
-    pub health_check: Option<HealthCheck>,
+    pub health_check: Option<HealthCheckConfig>,
 }
 
 impl PrimalConfig {
@@ -149,7 +149,7 @@ pub struct ServiceConfig {
     /// Names of services this depends on
     pub dependencies: Vec<String>,
     /// Optional health check configuration
-    pub health_check: Option<HealthCheck>,
+    pub health_check: Option<HealthCheckConfig>,
 }
 
 /// Source type for loading a workload (container, wasm, git, ipfs, local)
@@ -294,9 +294,17 @@ pub struct ServiceVolume {
     pub read_only: bool,
 }
 
-/// Health check configuration for a service or primal
+// Canonical HealthCheck (result type) from cellmembrane-types.
+// Re-exported for downstream consumers; not directly used in the CLI crate itself.
+#[allow(unused_imports)]
+pub use cellmembrane_types::HealthCheck;
+
+/// Health check configuration for a service or primal (manifest config type).
+///
+/// Distinct from `cellmembrane_types::HealthCheck` which is a check *result*.
+/// This type configures *how* to run health checks.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HealthCheck {
+pub struct HealthCheckConfig {
     /// Command and args to run (e.g. `["curl", "-f", "http://localhost/health"]`)
     pub command: Vec<String>,
     /// Interval between checks in seconds
@@ -402,18 +410,22 @@ pub struct ResourceUsage {
     pub network_tx_bytes: u64,
 }
 
-/// Status of a single service within a biome
+/// Biome-level service status (display/lifecycle only).
+///
+/// This is NOT the ecosystem-level `cellmembrane_types::ServiceInfo` used for
+/// service discovery and coordination. This struct tracks the status of
+/// individual services within a running biome instance.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServiceInfo {
-    /// Service name
+    /// Service name (key from the biome manifest).
     pub name: String,
-    /// Current status (running, stopped, etc.)
+    /// Current lifecycle status (e.g. "running", "stopped").
     pub status: String,
-    /// Number of replicas
+    /// Number of running replicas.
     pub replicas: u32,
-    /// Exposed port numbers
+    /// Exposed ports.
     pub ports: Vec<u16>,
-    /// Health status (healthy, unhealthy, unknown)
+    /// Health status summary (e.g. "healthy", "unhealthy").
     pub health: String,
 }
 
@@ -635,8 +647,8 @@ fn convert_source(src: toadstool_core::manifest::ManifestWorkloadSource) -> Work
     }
 }
 
-fn convert_health_check(hc: toadstool_core::manifest::ManifestHealthCheck) -> HealthCheck {
-    HealthCheck {
+fn convert_health_check(hc: toadstool_core::manifest::ManifestHealthCheck) -> HealthCheckConfig {
+    HealthCheckConfig {
         command: hc.command,
         interval: hc.interval_secs,
         timeout: hc.timeout_secs,

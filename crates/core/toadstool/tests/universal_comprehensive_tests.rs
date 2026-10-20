@@ -14,7 +14,7 @@ use toadstool::universal::*;
 #[test]
 fn test_security_level_variants() {
     let levels = [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -24,16 +24,16 @@ fn test_security_level_variants() {
 
 #[test]
 fn test_security_level_ordering() {
-    assert!(SecurityLevel::Basic < SecurityLevel::Standard);
+    assert!(SecurityLevel::None < SecurityLevel::Standard);
     assert!(SecurityLevel::Standard < SecurityLevel::High);
     assert!(SecurityLevel::High < SecurityLevel::Maximum);
 }
 
 #[test]
 fn test_security_level_equality() {
-    assert_eq!(SecurityLevel::Basic, SecurityLevel::Basic);
+    assert_eq!(SecurityLevel::None, SecurityLevel::None);
     assert_eq!(SecurityLevel::Maximum, SecurityLevel::Maximum);
-    assert_ne!(SecurityLevel::Basic, SecurityLevel::High);
+    assert_ne!(SecurityLevel::None, SecurityLevel::High);
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn test_security_level_clone_copy() {
 #[test]
 fn test_security_level_debug() {
     let levels = [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -184,7 +184,7 @@ fn test_primal_context_different_security_levels() {
     };
 
     for level in [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -238,7 +238,7 @@ fn test_primal_context_debug() {
         device_id: "device-test".to_string(),
         session_id: "session-test".to_string(),
         network_location: location,
-        security_level: SecurityLevel::Basic,
+        security_level: SecurityLevel::None,
         metadata: HashMap::new(),
     };
 

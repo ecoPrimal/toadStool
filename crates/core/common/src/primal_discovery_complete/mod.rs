@@ -88,108 +88,72 @@ impl CachedEndpoint {
     }
 }
 
-/// Discovery configuration
-#[derive(Clone, Debug)]
-pub struct DiscoveryConfig {
-    /// Cache TTL
-    pub cache_ttl: Duration,
+// Canonical DiscoveryConfig from cellmembrane-types.
+// Local struct removed — was {cache_ttl, health_check_interval, fallbacks, enable_mdns, require_mdns}.
+// Canonical: {methods, interval_secs, timeout_secs, max_services, cache_enabled, cache_ttl_secs, retries, enable_ipv6, fallbacks}.
+// Environment-aware defaults and fallback logic moved to PrimalDiscoveryEngine constructors.
+pub use cellmembrane_types::DiscoveryConfig;
 
-    /// Health check interval
-    pub health_check_interval: Duration,
+/// Build environment-aware fallbacks for discovery.
+///
+/// Populated when `TOADSTOOL_DISCOVERY_FALLBACKS` is set or `TOADSTOOL_ENV=development`.
+#[expect(
+    deprecated,
+    reason = "legacy env var names used as backward-compat fallbacks"
+)]
+pub(crate) fn build_discovery_fallbacks() -> HashMap<String, String> {
+    let coordination_port = resolve_env_port(
+        socket_env::TOADSTOOL_COORDINATION_PORT,
+        DEFAULT_COORDINATION_PORT,
+    );
+    let security_port =
+        resolve_env_port(socket_env::TOADSTOOL_SECURITY_PORT, DEFAULT_SECURITY_PORT);
+    let storage_port =
+        resolve_env_port(socket_env::TOADSTOOL_STORAGE_PORT, DEFAULT_STORAGE_PORT);
 
-    /// Configured fallback endpoints by capability
-    pub fallbacks: HashMap<String, String>,
+    let dev_mode = std::env::var(socket_env::TOADSTOOL_DISCOVERY_FALLBACKS).is_ok()
+        || std::env::var(socket_env::TOADSTOOL_ENV)
+            .is_ok_and(|e| e == crate::interned_strings::env::DEVELOPMENT);
 
-    /// Enable mDNS discovery
-    pub enable_mdns: bool,
+    if !dev_mode {
+        return HashMap::new();
+    }
 
-    /// Fail fast if mDNS unavailable (vs falling back)
-    pub require_mdns: bool,
-}
+    let bind_host = std::env::var(socket_env::TOADSTOOL_BIND_HOST)
+        .or_else(|_| std::env::var(socket_env::BIND_HOST))
+        .unwrap_or_else(|_| crate::constants::network::DEFAULT_HOSTNAME.to_string());
 
-impl Default for DiscoveryConfig {
-    fn default() -> Self {
-        // Environment-aware defaults
-        let enable_mdns = std::env::var(socket_env::TOADSTOOL_MDNS_ENABLE)
-            .map_or(true, |v| v == "true" || v == "1");
+    let specs: &[(&str, &str, u16, &[&str])] = &[
+        (
+            socket_env::TOADSTOOL_COORDINATION_URL,
+            socket_env::LEGACY_SONGBIRD_URL,
+            coordination_port,
+            &["orchestration", "coordination"],
+        ),
+        (
+            socket_env::TOADSTOOL_SECURITY_URL,
+            socket_env::LEGACY_BEARDOG_URL,
+            security_port,
+            &["security", "authentication"],
+        ),
+        (
+            socket_env::TOADSTOOL_STORAGE_URL,
+            socket_env::LEGACY_NESTGATE_URL,
+            storage_port,
+            &["storage"],
+        ),
+    ];
 
-        let require_mdns = std::env::var(socket_env::TOADSTOOL_MDNS_REQUIRE)
-            .is_ok_and(|v| v == "true" || v == "1");
-
-        Self {
-            cache_ttl: Duration::from_secs(300), // 5 minutes
-            health_check_interval: Duration::from_secs(30),
-            fallbacks: Self::default_fallbacks(),
-            enable_mdns,
-            require_mdns,
+    let mut fallbacks = HashMap::new();
+    for (cap_env, legacy_env, port, keys) in specs {
+        let url = std::env::var(cap_env)
+            .or_else(|_| std::env::var(legacy_env))
+            .unwrap_or_else(|_| format!("{HTTP_PROTOCOL}{bind_host}:{port}"));
+        for key in *keys {
+            fallbacks.insert((*key).to_string(), url.clone());
         }
     }
-}
-
-impl DiscoveryConfig {
-    /// Build fallbacks from environment. Fallbacks are only populated when
-    /// `TOADSTOOL_DISCOVERY_FALLBACKS` is set or `TOADSTOOL_ENV=development`.
-    ///
-    /// Each capability URL is resolved from env vars, falling back to
-    /// `{bind_host}:{port}` using `toadstool_config::ports::capability_fallback`.
-    #[expect(
-        deprecated,
-        reason = "legacy env var names used as backward-compat fallbacks"
-    )]
-    fn default_fallbacks() -> HashMap<String, String> {
-        let coordination_port = resolve_env_port(
-            socket_env::TOADSTOOL_COORDINATION_PORT,
-            DEFAULT_COORDINATION_PORT,
-        );
-        let security_port =
-            resolve_env_port(socket_env::TOADSTOOL_SECURITY_PORT, DEFAULT_SECURITY_PORT);
-        let storage_port =
-            resolve_env_port(socket_env::TOADSTOOL_STORAGE_PORT, DEFAULT_STORAGE_PORT);
-
-        let dev_mode = std::env::var(socket_env::TOADSTOOL_DISCOVERY_FALLBACKS).is_ok()
-            || std::env::var(socket_env::TOADSTOOL_ENV)
-                .is_ok_and(|e| e == crate::interned_strings::env::DEVELOPMENT);
-
-        if !dev_mode {
-            return HashMap::new();
-        }
-
-        let bind_host = std::env::var(socket_env::TOADSTOOL_BIND_HOST)
-            .or_else(|_| std::env::var(socket_env::BIND_HOST))
-            .unwrap_or_else(|_| crate::constants::network::DEFAULT_HOSTNAME.to_string());
-
-        let specs: &[(&str, &str, u16, &[&str])] = &[
-            (
-                socket_env::TOADSTOOL_COORDINATION_URL,
-                socket_env::LEGACY_SONGBIRD_URL,
-                coordination_port,
-                &["orchestration", "coordination"],
-            ),
-            (
-                socket_env::TOADSTOOL_SECURITY_URL,
-                socket_env::LEGACY_BEARDOG_URL,
-                security_port,
-                &["security", "authentication"],
-            ),
-            (
-                socket_env::TOADSTOOL_STORAGE_URL,
-                socket_env::LEGACY_NESTGATE_URL,
-                storage_port,
-                &["storage"],
-            ),
-        ];
-
-        let mut fallbacks = HashMap::new();
-        for (cap_env, legacy_env, port, keys) in specs {
-            let url = std::env::var(cap_env)
-                .or_else(|_| std::env::var(legacy_env))
-                .unwrap_or_else(|_| format!("{HTTP_PROTOCOL}{bind_host}:{port}"));
-            for key in *keys {
-                fallbacks.insert((*key).to_string(), url.clone());
-            }
-        }
-        fallbacks
-    }
+    fallbacks
 }
 
 impl<C: DiscoveryClient> PrimalDiscoveryEngine<C> {
@@ -202,14 +166,9 @@ impl<C: DiscoveryClient> PrimalDiscoveryEngine<C> {
         mdns_client: Option<Arc<C>>,
         config: DiscoveryConfig,
     ) -> ToadStoolResult<Self> {
-        // Validate configuration
-        if config.require_mdns && mdns_client.is_none() {
-            return Err(ToadStoolError::configuration(
-                "mDNS client required but not provided",
-            ));
-        }
+        let has_mdns = config.methods.iter().any(|m| m == "mdns");
 
-        if config.enable_mdns && mdns_client.is_some() {
+        if has_mdns && mdns_client.is_some() {
             info!("✅ mDNS discovery enabled");
         } else if !config.fallbacks.is_empty() {
             info!(
@@ -292,14 +251,15 @@ impl<C: DiscoveryClient> PrimalDiscoveryEngine<C> {
 
         // 1. Check cache
         if let Some(cached) = self.get_from_cache(&capability_str).await
-            && cached.is_fresh(self.config.cache_ttl)
+            && cached.is_fresh(Duration::from_secs(self.config.cache_ttl_secs))
         {
             debug!("✅ Cache hit for capability: {}", capability_str);
             return Ok(vec![cached.service]);
         }
 
         // 2. Try mDNS discovery
-        if self.config.enable_mdns
+        let has_mdns = self.config.methods.iter().any(|m| m == "mdns");
+        if has_mdns
             && let Some(ref mdns) = self.mdns_client
         {
             debug!("🔍 Querying mDNS for capability: {}", capability_str);
@@ -483,7 +443,7 @@ impl<C: DiscoveryClient> PrimalDiscoveryEngine<C> {
             let total = cache.len();
             let fresh = cache
                 .values()
-                .filter(|e| e.is_fresh(self.config.cache_ttl))
+                .filter(|e| e.is_fresh(Duration::from_secs(self.config.cache_ttl_secs)))
                 .count();
             drop(cache);
             (total, fresh)

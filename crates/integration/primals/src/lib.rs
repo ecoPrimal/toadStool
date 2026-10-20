@@ -70,7 +70,7 @@ pub mod services;
 pub mod shader_compiler;
 
 // Re-exports for backward compatibility - all public types accessible from crate root
-pub use health::{HealthCheck, HealthCheckStatus, HealthStatus};
+pub use health::{HealthCheck, HealthStatus};
 pub use integration_manifest::{BiomeManifest, BiomeMetadata};
 pub use manager::{
     BootstrapResult, PrimalBootstrapResult, PrimalIntegrationConfig, PrimalIntegrationManager,

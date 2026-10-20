@@ -3,7 +3,7 @@
 
 use super::HwLearnHandler;
 use super::helpers::observe_from_text;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 impl HwLearnHandler {
     /// `compute.hardware.observe` — Parse an mmiotrace into structured events.

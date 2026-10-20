@@ -7,7 +7,7 @@
 //! be exchanged. This handler orchestrates the per-partition shader dispatch
 //! and CPU-staged inter-adapter data movement.
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 use super::DispatchHandler;
 

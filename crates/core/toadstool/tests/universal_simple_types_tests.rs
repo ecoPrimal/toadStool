@@ -12,16 +12,16 @@ mod security_tests {
 
     #[test]
     fn test_security_level_ordering() {
-        assert!(SecurityLevel::Basic < SecurityLevel::Standard);
+        assert!(SecurityLevel::None < SecurityLevel::Standard);
         assert!(SecurityLevel::Standard < SecurityLevel::High);
         assert!(SecurityLevel::High < SecurityLevel::Maximum);
     }
 
     #[test]
     fn test_security_level_equality() {
-        assert_eq!(SecurityLevel::Basic, SecurityLevel::Basic);
+        assert_eq!(SecurityLevel::None, SecurityLevel::None);
         assert_eq!(SecurityLevel::High, SecurityLevel::High);
-        assert_ne!(SecurityLevel::Basic, SecurityLevel::Maximum);
+        assert_ne!(SecurityLevel::None, SecurityLevel::Maximum);
     }
 
     #[test]
@@ -34,7 +34,7 @@ mod security_tests {
     #[test]
     fn test_all_security_levels() {
         let levels = vec![
-            SecurityLevel::Basic,
+            SecurityLevel::None,
             SecurityLevel::Standard,
             SecurityLevel::High,
             SecurityLevel::Maximum,
@@ -320,7 +320,7 @@ mod integration_tests {
 
     #[test]
     fn test_security_level_upgrade_path() {
-        let start_level = SecurityLevel::Basic;
+        let start_level = SecurityLevel::None;
         let upgrade_path = vec![
             SecurityLevel::Standard,
             SecurityLevel::High,

@@ -166,21 +166,10 @@ pub fn encryption_algorithm_from_wire(name: &str) -> EncryptionAlgorithm {
     }
 }
 
-/// Security level requirement
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
-pub enum SecurityLevel {
-    /// Standard security (software-based)
-    Standard,
-
-    /// High security (HSM recommended)
-    High,
-
-    /// Maximum security (HSM required, FIPS 140-2 Level 3+)
-    Maximum,
-
-    /// Quantum-resistant algorithms required
-    QuantumResistant,
-}
+// Canonical SecurityLevel from cellmembrane-types.
+// Local enum removed — was (Standard, High, Maximum, QuantumResistant).
+// Exact match with canonical variants.
+pub use cellmembrane_types::SecurityLevel;
 
 /// Key management request
 #[derive(Debug, Clone, Serialize, Deserialize)]

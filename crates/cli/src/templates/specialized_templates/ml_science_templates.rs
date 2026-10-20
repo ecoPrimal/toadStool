@@ -10,7 +10,7 @@ use toadstool_config::env_config::EnvironmentConfig;
 use super::super::basic_templates::TemplateComponents;
 use super::super::constants::{images, resource_sizes};
 use crate::{
-    DatasetConfig, HealthCheck, PrimalConfig, ServiceConfig, ServicePort, ServiceResources,
+    DatasetConfig, HealthCheckConfig, PrimalConfig, ServiceConfig, ServicePort, ServiceResources,
     WorkloadSource,
 };
 
@@ -40,7 +40,7 @@ pub fn create_science_template() -> TemplateComponents {
             dependencies: vec!["capability:pki".to_string()],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         super::super::constants::commands::CURL.to_string(),
                         "-f".to_string(),
@@ -96,7 +96,7 @@ pub fn create_science_template() -> TemplateComponents {
             ],
             health_check: Some({
                 let config = EnvironmentConfig::from_env();
-                HealthCheck {
+                HealthCheckConfig {
                     command: vec![
                         "curl".to_string(),
                         "-f".to_string(),
@@ -147,7 +147,7 @@ pub fn create_science_template() -> TemplateComponents {
             }],
             volumes: vec![],
             dependencies: vec!["capability:pki".to_string()],
-            health_check: Some(HealthCheck {
+            health_check: Some(HealthCheckConfig {
                 command: vec![
                     "pg_isready".to_string(),
                     "-U".to_string(),

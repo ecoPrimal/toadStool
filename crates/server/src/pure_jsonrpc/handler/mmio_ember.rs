@@ -13,7 +13,7 @@ use super::mmio::{
     base64_encode, boot0_alive, falcon_offsets, open_sysfs_bar0, open_sysfs_bar0_rw, parse_bdf,
     parse_u32_param,
 };
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// `ember.fecs.state` — read FECS falcon registers via BAR0 alias offsets.
 pub fn ember_fecs_state(params: Option<&Value>) -> Result<Value, JsonRpcError> {

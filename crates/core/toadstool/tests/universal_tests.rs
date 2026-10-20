@@ -11,7 +11,7 @@ use toadstool::universal::*;
 #[test]
 fn test_security_level_variants() {
     let levels = [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -21,15 +21,15 @@ fn test_security_level_variants() {
 
 #[test]
 fn test_security_level_ordering() {
-    assert!(SecurityLevel::Basic < SecurityLevel::Standard);
+    assert!(SecurityLevel::None < SecurityLevel::Standard);
     assert!(SecurityLevel::Standard < SecurityLevel::High);
     assert!(SecurityLevel::High < SecurityLevel::Maximum);
 }
 
 #[test]
 fn test_security_level_equality() {
-    assert_eq!(SecurityLevel::Basic, SecurityLevel::Basic);
-    assert_ne!(SecurityLevel::Basic, SecurityLevel::Standard);
+    assert_eq!(SecurityLevel::None, SecurityLevel::None);
+    assert_ne!(SecurityLevel::None, SecurityLevel::Standard);
 }
 
 #[test]
@@ -42,9 +42,9 @@ fn test_security_level_clone() {
 #[test]
 fn test_security_level_hash() {
     let mut set = HashSet::new();
-    set.insert(SecurityLevel::Basic);
+    set.insert(SecurityLevel::None);
     set.insert(SecurityLevel::Standard);
-    set.insert(SecurityLevel::Basic); // Duplicate
+    set.insert(SecurityLevel::None); // Duplicate
     assert_eq!(set.len(), 2); // Only 2 unique values
 }
 
@@ -177,7 +177,7 @@ fn test_primal_context_security_levels() {
     };
 
     let levels = [
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,

@@ -55,7 +55,7 @@ fn build_fallbacks_from_config() -> HashMap<String, String> {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Capability-based discovery: fallbacks from config/env, not hardcoded constants
     let config = DiscoveryConfig {
-        enable_mdns: true, // Try mDNS first; fall back to config
+        methods: vec!["mdns".into(), "env".into()],
         fallbacks: build_fallbacks_from_config(),
         ..Default::default()
     };

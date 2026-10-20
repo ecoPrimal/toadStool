@@ -138,7 +138,7 @@ fn test_assemble_discovered_services_later_source_overwrites_duplicate_key() {
             .discovered_services
             .get("key")
             .expect("key")
-            .endpoint,
+            .endpoints.first().map(String::as_str).unwrap_or(""),
         "http://second"
     );
 }

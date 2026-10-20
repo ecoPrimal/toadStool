@@ -112,49 +112,13 @@ pub struct PrimalDefinition {
     pub discovery_endpoint: Option<String>,
 }
 
-/// Discovery configuration for finding primals at runtime.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct DiscoveryConfig {
-    /// Discovery methods in priority order (e.g. `["mdns", "environment"]`).
-    #[serde(default)]
-    pub methods: Vec<String>,
-
-    /// Enable discovery result caching.
-    #[serde(default)]
-    pub cache_enabled: bool,
-
-    /// Cache TTL in seconds.
-    #[serde(default)]
-    pub cache_ttl_seconds: u64,
-
-    /// Number of retry attempts on discovery failure.
-    #[serde(default)]
-    pub retry_attempts: u32,
-
-    /// Delay between retries in milliseconds.
-    #[serde(default)]
-    pub retry_delay_ms: u64,
-
-    /// Discovery timeout in seconds.
-    #[serde(default)]
-    pub timeout_seconds: u64,
-
-    /// Enable health checks before using discovered services.
-    #[serde(default)]
-    pub health_check_enabled: bool,
-
-    /// Health check interval in seconds.
-    #[serde(default)]
-    pub health_check_interval_seconds: u64,
-
-    /// Health check timeout in seconds.
-    #[serde(default)]
-    pub health_check_timeout_seconds: u64,
-
-    /// Discovery preferences (local, healthy, load balance).
-    #[serde(default)]
-    pub preferences: DiscoveryPreferences,
-}
+// Canonical DiscoveryConfig from cellmembrane-types.
+// Local struct removed — was {methods, cache_enabled, cache_ttl_seconds, retry_attempts,
+// retry_delay_ms, timeout_seconds, health_check_enabled, health_check_interval_seconds,
+// health_check_timeout_seconds, preferences}.
+// Canonical: {methods, interval_secs, timeout_secs, max_services, cache_enabled,
+// cache_ttl_secs, retries, enable_ipv6, fallbacks}.
+pub use cellmembrane_types::DiscoveryConfig;
 
 /// Discovery preferences for service selection.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

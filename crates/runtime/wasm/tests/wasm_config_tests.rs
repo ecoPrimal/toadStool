@@ -57,7 +57,7 @@ fn test_wasm_runtime_config_fuel_limit() {
 fn test_wasm_runtime_config_security_level() {
     let config = WasmRuntimeConfig::default();
 
-    assert!(matches!(config.security_level, SecurityLevel::Strict));
+    assert!(matches!(config.security_level, SecurityLevel::High));
 }
 
 #[test]
@@ -82,14 +82,14 @@ fn test_security_level_none() {
 
 #[test]
 fn test_security_level_basic() {
-    let level = SecurityLevel::Basic;
-    assert!(matches!(level, SecurityLevel::Basic));
+    let level = SecurityLevel::None;
+    assert!(matches!(level, SecurityLevel::None));
 }
 
 #[test]
 fn test_security_level_strict() {
-    let level = SecurityLevel::Strict;
-    assert!(matches!(level, SecurityLevel::Strict));
+    let level = SecurityLevel::High;
+    assert!(matches!(level, SecurityLevel::High));
 }
 
 #[test]
@@ -100,11 +100,11 @@ fn test_security_level_maximum() {
 
 #[test]
 fn test_security_level_clone() {
-    let level1 = SecurityLevel::Strict;
+    let level1 = SecurityLevel::High;
     let level2 = level1;
 
     match (level1, level2) {
-        (SecurityLevel::Strict, SecurityLevel::Strict) => {
+        (SecurityLevel::High, SecurityLevel::High) => {
             // Clone successful
         }
         _ => panic!("Clone failed"),
@@ -115,8 +115,8 @@ fn test_security_level_clone() {
 fn test_all_security_levels() {
     let levels = [
         SecurityLevel::None,
-        SecurityLevel::Basic,
-        SecurityLevel::Strict,
+        SecurityLevel::None,
+        SecurityLevel::High,
         SecurityLevel::Maximum,
     ];
 

@@ -16,7 +16,7 @@ fn test_encryption_request_serialization() {
         data: vec![1, 2, 3, 4, 5],
         key_id: Some("key-123".to_string()),
         algorithm: Some("aes-256-gcm".to_string()),
-        security_level: SecurityLevel::Enhanced,
+        security_level: SecurityLevel::High,
     };
     let json = serde_json::to_value(&request);
     assert!(json.is_ok());
@@ -114,8 +114,8 @@ fn test_bear_dog_capability_variants() {
 
 #[test]
 fn test_security_level_ordering() {
-    assert!(SecurityLevel::Standard < SecurityLevel::Enhanced);
-    assert!(SecurityLevel::Enhanced < SecurityLevel::HardwareSecured);
+    assert!(SecurityLevel::Standard < SecurityLevel::High);
+    assert!(SecurityLevel::High < SecurityLevel::Maximum);
 }
 
 #[test]
@@ -258,8 +258,8 @@ fn test_bear_dog_capability_all_variants_serde() {
 fn test_security_level_serde_roundtrip() {
     for level in [
         SecurityLevel::Standard,
-        SecurityLevel::Enhanced,
-        SecurityLevel::HardwareSecured,
+        SecurityLevel::High,
+        SecurityLevel::Maximum,
     ] {
         let json = serde_json::to_string(&level).unwrap();
         let _: SecurityLevel = serde_json::from_str(&json).unwrap();
@@ -287,12 +287,12 @@ fn test_encryption_request_roundtrip() {
         data: vec![0xFF, 0xFE],
         key_id: None,
         algorithm: Some("chacha20".to_string()),
-        security_level: SecurityLevel::HardwareSecured,
+        security_level: SecurityLevel::Maximum,
     };
     let json = serde_json::to_string(&request).unwrap();
     let parsed: EncryptionRequest = serde_json::from_str(&json).unwrap();
     assert_eq!(parsed.data, request.data);
-    assert_eq!(parsed.security_level, SecurityLevel::HardwareSecured);
+    assert_eq!(parsed.security_level, SecurityLevel::Maximum);
 }
 
 #[test]

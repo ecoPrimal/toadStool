@@ -381,15 +381,13 @@ impl ToadStoolComputeRpc for ToadStoolTarpcServer {
         )]
         let error_count = self.error_count.load(Ordering::Relaxed) as usize; // display/metrics only
 
-        Ok(HealthStatus {
-            healthy: true,
-            version: Arc::clone(&self.version),
-            uptime_secs: uptime.as_secs(),
-            resource_utilization: self.calculate_resource_utilization().await,
-            active_workloads: active_count,
-            queued_workloads: queued_count,
-            error_count,
-        })
+        Ok(HealthStatus::ok()
+            .with_uptime(uptime.as_secs())
+            .with_detail("version", serde_json::Value::String(self.version.to_string()))
+            .with_detail("resource_utilization", serde_json::json!(self.calculate_resource_utilization().await))
+            .with_detail("active_workloads", serde_json::json!(active_count))
+            .with_detail("queued_workloads", serde_json::json!(queued_count))
+            .with_detail("error_count", serde_json::json!(error_count)))
     }
 }
 

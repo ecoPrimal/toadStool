@@ -312,14 +312,13 @@ fn test_system_summary_from_capabilities_with_ecosystem_services() {
     discovered.insert(
         "coordination".to_string(),
         ServiceInfo {
+            id: "coordination".to_string(),
             name: "coordination".to_string(),
-            endpoint: test_endpoint,
-            service_type: "NetworkCoordination".to_string(),
-            version: "1.0".to_string(),
+            version: Some("1.0".to_string()),
+            endpoints: vec![test_endpoint],
             capabilities: vec![],
-            status: ecosystem::ServiceStatus::Healthy,
-            discovered_via: "test".to_string(),
-            response_time_ms: 0,
+            status: ecosystem::ServiceStatus::Running,
+            metadata: Default::default(),
         },
     );
     let ecosystem = DiscoveredServices {

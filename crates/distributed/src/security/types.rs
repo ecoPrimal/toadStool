@@ -107,16 +107,10 @@ pub enum EncryptionOperation {
     Decrypt,
 }
 
-/// Security level for operations
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-pub enum SecurityLevel {
-    /// Software-only cryptography.
-    Standard,
-    /// Stronger software or policy-backed crypto.
-    Enhanced,
-    /// Hardware-backed (e.g. HSM) security.
-    HardwareSecured,
-}
+// Canonical SecurityLevel from cellmembrane-types.
+// Local enum removed — was (Standard, Enhanced, HardwareSecured).
+// Mapping: Standard→Standard, Enhanced→High, HardwareSecured→Maximum.
+pub use cellmembrane_types::SecurityLevel;
 
 /// Key management request to Security
 #[derive(Debug, Clone, Serialize, Deserialize)]

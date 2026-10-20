@@ -111,13 +111,13 @@ fn test_security_level_none() {
 
 #[test]
 fn test_security_level_basic() {
-    let level = SecurityLevel::Basic;
+    let level = SecurityLevel::None;
     assert!(format!("{level:?}").contains("Basic"));
 }
 
 #[test]
 fn test_security_level_strict() {
-    let level = SecurityLevel::Strict;
+    let level = SecurityLevel::High;
     assert!(format!("{level:?}").contains("Strict"));
 }
 
@@ -129,7 +129,7 @@ fn test_security_level_maximum() {
 
 #[test]
 fn test_security_level_clone() {
-    let level1 = SecurityLevel::Strict;
+    let level1 = SecurityLevel::High;
     let level2 = level1;
     assert!(format!("{level1:?}") == format!("{level2:?}"));
 }
@@ -228,8 +228,8 @@ async fn test_engine_creation_default() {
 async fn test_engine_creation_with_security_levels() {
     for level in [
         SecurityLevel::None,
-        SecurityLevel::Basic,
-        SecurityLevel::Strict,
+        SecurityLevel::None,
+        SecurityLevel::High,
         SecurityLevel::Maximum,
     ] {
         let config = WasmRuntimeConfig {

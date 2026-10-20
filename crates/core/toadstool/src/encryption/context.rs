@@ -61,7 +61,7 @@ impl<P: CryptoProvider> EncryptionContext<P> {
             security_level: self.config.min_security_level,
             hardware_backed: matches!(
                 self.config.min_security_level,
-                SecurityLevel::HardwareSecured
+                SecurityLevel::Maximum
             ),
         };
 

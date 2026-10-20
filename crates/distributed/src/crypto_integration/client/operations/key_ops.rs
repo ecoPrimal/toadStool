@@ -123,7 +123,7 @@ impl CryptoServiceClient {
                 key_name,
                 key_material,
                 algorithm,
-                toadstool::encryption::SecurityLevel::Enhanced,
+                toadstool::encryption::SecurityLevel::High,
             ))
         }
     }

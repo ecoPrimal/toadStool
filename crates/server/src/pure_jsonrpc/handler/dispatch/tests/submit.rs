@@ -10,7 +10,7 @@ use crate::pure_jsonrpc::handler::dispatch::submit_params::{
     resolve_workgroup_size,
 };
 use crate::pure_jsonrpc::handler::method_gate::{CallerContext, ResourceEnvelope};
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 fn ctx_with(env: ResourceEnvelope) -> CallerContext {
     CallerContext {

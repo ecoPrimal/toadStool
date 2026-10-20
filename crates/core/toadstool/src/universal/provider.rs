@@ -181,28 +181,28 @@ mod tests {
 
     #[test]
     fn test_primal_id() {
-        let context = make_context(SecurityLevel::Basic);
+        let context = make_context(SecurityLevel::None);
         let provider = ToadStoolPrimalProvider::new(context);
         assert_eq!(provider.primal_id(), "toadstool");
     }
 
     #[test]
     fn test_instance_id() {
-        let context = make_context(SecurityLevel::Basic);
+        let context = make_context(SecurityLevel::None);
         let provider = ToadStoolPrimalProvider::new(context);
         assert_eq!(provider.instance_id(), INSTANCE_ID);
     }
 
     #[test]
     fn test_primal_type() {
-        let context = make_context(SecurityLevel::Basic);
+        let context = make_context(SecurityLevel::None);
         let provider = ToadStoolPrimalProvider::new(context);
         assert_eq!(provider.primal_type(), PrimalType::Compute);
     }
 
     #[test]
     fn test_capabilities_non_empty() {
-        let context = make_context(SecurityLevel::Basic);
+        let context = make_context(SecurityLevel::None);
         let provider = ToadStoolPrimalProvider::new(context);
         let caps = provider.capabilities();
         assert!(!caps.is_empty());
@@ -219,13 +219,13 @@ mod tests {
     fn test_can_serve_context_request_lower() {
         let provider_ctx = make_context(SecurityLevel::High);
         let provider = ToadStoolPrimalProvider::new(provider_ctx);
-        let request_ctx = make_context(SecurityLevel::Basic);
+        let request_ctx = make_context(SecurityLevel::None);
         assert!(provider.can_serve_context(&request_ctx));
     }
 
     #[test]
     fn test_can_serve_context_request_higher() {
-        let provider_ctx = make_context(SecurityLevel::Basic);
+        let provider_ctx = make_context(SecurityLevel::None);
         let provider = ToadStoolPrimalProvider::new(provider_ctx);
         let request_ctx = make_context(SecurityLevel::Maximum);
         assert!(!provider.can_serve_context(&request_ctx));
@@ -235,7 +235,7 @@ mod tests {
     fn test_can_serve_context_maximum_provider() {
         let provider_ctx = make_context(SecurityLevel::Maximum);
         let provider = ToadStoolPrimalProvider::new(provider_ctx);
-        let request_ctx = make_context(SecurityLevel::Basic);
+        let request_ctx = make_context(SecurityLevel::None);
         assert!(provider.can_serve_context(&request_ctx));
     }
 }

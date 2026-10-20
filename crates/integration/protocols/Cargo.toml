@@ -30,6 +30,9 @@ legacy-protocol-client = ["runtime"]
 legacy-security-client = ["runtime"]
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Core ToadStool types
 toadstool = { path = "../../core/toadstool", default-features = false, optional = true }
 toadstool-common = { path = "../../core/common", default-features = false }

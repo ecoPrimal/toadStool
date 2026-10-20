@@ -14,7 +14,7 @@ const DEFAULT_RETRY_DELAY_SECS: u64 = 5;
 use crate::BiomeManifest;
 use crate::PrimalConfig;
 use crate::PrimalIntegration;
-use crate::health::{HealthCheck, HealthCheckStatus, HealthStatus};
+use crate::health::{HealthCheck, HealthStatus};
 use crate::service::StartupStatus;
 
 /// Primal Integration Manager
@@ -234,16 +234,13 @@ impl PrimalIntegrationManager {
                     tracing::error!("Failed to get health status for {}: {}", name, e);
                     statuses.insert(
                         name.clone(),
-                        HealthStatus {
-                            healthy: false,
-                            checks: vec![HealthCheck {
+                        HealthStatus::sick(e.to_string())
+                            .with_check(HealthCheck {
                                 name: "system".to_string(),
-                                status: HealthCheckStatus::Unhealthy,
+                                passed: false,
                                 message: Some(e.to_string()),
-                                duration: Duration::from_millis(0),
-                            }],
-                            last_check: std::time::SystemTime::now(),
-                        },
+                                latency_ms: Some(0),
+                            }),
                     );
                 }
             }

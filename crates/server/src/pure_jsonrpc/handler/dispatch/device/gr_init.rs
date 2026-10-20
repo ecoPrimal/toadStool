@@ -2,7 +2,7 @@
 //! `device.gr.init` JSON-RPC handler — GR context init method entries.
 
 use super::DispatchHandler;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 impl DispatchHandler {
     /// `device.gr.init` — submit GR context init method entries to a VFIO device.

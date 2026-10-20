@@ -3,6 +3,7 @@
 //! runlist debugging.
 
 use super::DispatchHandler;
+use crate::pure_jsonrpc::types::JsonRpcErrorExt;
 
 /// Reports full PFIFO register state for PBDMA runlist debugging.
 ///

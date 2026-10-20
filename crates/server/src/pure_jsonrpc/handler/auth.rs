@@ -9,7 +9,7 @@
 #[cfg(test)]
 use super::method_gate::GateMode;
 use super::method_gate::{DispatchTrustLevel, MethodGate, classify_method};
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError};
 
 /// `auth.check` — test whether a method would be allowed for the current caller.
 ///

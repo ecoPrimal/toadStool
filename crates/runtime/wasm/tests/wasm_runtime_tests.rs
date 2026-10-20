@@ -67,7 +67,7 @@ async fn test_security_level_none() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_security_level_basic() {
     let config = WasmRuntimeConfig {
-        security_level: SecurityLevel::Basic,
+        security_level: SecurityLevel::None,
         ..Default::default()
     };
     let engine = WasmRuntimeEngine::new(config);
@@ -77,7 +77,7 @@ async fn test_security_level_basic() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_security_level_strict() {
     let config = WasmRuntimeConfig {
-        security_level: SecurityLevel::Strict,
+        security_level: SecurityLevel::High,
         ..Default::default()
     };
     let engine = WasmRuntimeEngine::new(config);

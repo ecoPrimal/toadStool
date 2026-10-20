@@ -208,8 +208,8 @@ impl EcosystemDiscoverer {
         info!("✅ Ecosystem discovery complete:");
         for (name, service) in &services.discovered_services {
             info!(
-                "   🔗 {} -> {} ({})",
-                name, service.endpoint, service.service_type
+                "   🔗 {} -> {:?}",
+                name, service.endpoints
             );
         }
 
@@ -327,23 +327,17 @@ impl EcosystemDiscoverer {
             if let Some(endpoints) = try_discover_via_mdns(capability) {
                 for endpoint in endpoints {
                     let status = if endpoint.healthy {
-                        crate::ecosystem_types::ServiceStatus::Healthy
+                        crate::ecosystem_types::ServiceStatus::Running
                     } else {
                         crate::ecosystem_types::ServiceStatus::Unknown
                     };
-                    services.insert(
-                        endpoint.service_id.clone(),
-                        ServiceInfo {
-                            name: endpoint.service_id.clone(),
-                            endpoint: endpoint.url,
-                            service_type: capability.to_string(),
-                            version: String::new(),
-                            capabilities: endpoint.capabilities,
-                            status,
-                            discovered_via: "mdns".to_string(),
-                            response_time_ms: 0,
-                        },
-                    );
+                    let mut si = ServiceInfo::new(&endpoint.service_id, &endpoint.service_id)
+                        .with_endpoint(endpoint.url);
+                    si.capabilities = endpoint.capabilities;
+                    si.status = status;
+                    si.metadata.insert("discovered_via".into(), "mdns".into());
+                    si.metadata.insert("service_type".into(), capability.to_string());
+                    services.insert(endpoint.service_id.clone(), si);
                 }
             }
         }

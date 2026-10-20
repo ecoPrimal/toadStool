@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Job queue and gate routing for JSON-RPC handler.
 
-use std::borrow::Cow;
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::cross_gate::{GateOwnership, JobRouter};
 use crate::gpu_job_queue::{GpuJobQueue, JobQueueConfig, JobQueueError};
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Handles GPU job queue operations and gate routing.
 pub(super) struct JobHandler {
@@ -37,7 +36,7 @@ impl JobHandler {
         };
         JsonRpcError {
             code,
-            message: Cow::Owned(err.to_string()),
+            message: err.to_string(),
             data: None,
         }
     }

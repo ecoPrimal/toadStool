@@ -48,7 +48,7 @@ pub async fn discover_via_mdns() -> DiscoveryResult<Vec<DiscoveredService>> {
     use crate::primal_discovery_mdns::MdnsAdapter;
 
     let mdns_config = PrimalDiscoveryConfig {
-        enable_mdns: true,
+        methods: vec!["mdns".into()],
         ..Default::default()
     };
 

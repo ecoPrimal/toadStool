@@ -13,7 +13,7 @@ use toadstool_core::silicon::{
     SiliconEnergyLedger, SiliconUnit,
 };
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Handler for `compute.performance_surface.*` and `compute.silicon_ledger.*` JSON-RPC methods.
 ///

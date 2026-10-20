@@ -16,7 +16,7 @@ use super::transport::TransportHandler;
 use super::{JsonRpcHandler, core, extract_caller_context};
 #[cfg(target_os = "linux")]
 use super::{mmio, sovereign};
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 type JsonRpcResult = Result<serde_json::Value, JsonRpcError>;
 

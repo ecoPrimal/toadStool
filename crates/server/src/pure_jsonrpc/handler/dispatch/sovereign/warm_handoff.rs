@@ -13,7 +13,7 @@ pub(crate) async fn sovereign_warm_handoff(
     handler: &DispatchHandler,
     params: Option<&serde_json::Value>,
 ) -> Result<serde_json::Value, crate::pure_jsonrpc::types::JsonRpcError> {
-    use crate::pure_jsonrpc::types::JsonRpcError;
+    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
     use toadstool_cylinder::vfio::sovereign_handoff::HandoffConfig;
 
     let bdf = params

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use serde::Deserialize;
 use serde_json::Value;
 use toadstool_cylinder::vfio::sovereign_init::SovereignInitOptions;

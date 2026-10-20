@@ -10,7 +10,7 @@
 //! All MMIO operations use fork-isolated access via `toadstool-cylinder`'s
 //! `SysfsBar0` or `MappedBar` to protect the daemon from hardware hangs.
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use serde_json::Value;
 use tracing::debug;
 

@@ -22,14 +22,14 @@ use uuid::Uuid;
 fn test_security_level_ordering() {
     assert!(SecurityLevel::Maximum > SecurityLevel::High);
     assert!(SecurityLevel::High > SecurityLevel::Standard);
-    assert!(SecurityLevel::Standard > SecurityLevel::Basic);
+    assert!(SecurityLevel::Standard > SecurityLevel::None);
 }
 
 #[test]
 fn test_security_level_equality() {
-    assert_eq!(SecurityLevel::Basic, SecurityLevel::Basic);
+    assert_eq!(SecurityLevel::None, SecurityLevel::None);
     assert_eq!(SecurityLevel::Maximum, SecurityLevel::Maximum);
-    assert_ne!(SecurityLevel::Basic, SecurityLevel::High);
+    assert_ne!(SecurityLevel::None, SecurityLevel::High);
 }
 
 #[test]
@@ -172,12 +172,12 @@ fn test_primal_context_security_levels() {
         metadata: HashMap::new(),
     };
 
-    let basic = create_context(SecurityLevel::Basic);
+    let basic = create_context(SecurityLevel::None);
     let standard = create_context(SecurityLevel::Standard);
     let high = create_context(SecurityLevel::High);
     let maximum = create_context(SecurityLevel::Maximum);
 
-    assert_eq!(basic.security_level, SecurityLevel::Basic);
+    assert_eq!(basic.security_level, SecurityLevel::None);
     assert_eq!(standard.security_level, SecurityLevel::Standard);
     assert_eq!(high.security_level, SecurityLevel::High);
     assert_eq!(maximum.security_level, SecurityLevel::Maximum);
@@ -386,7 +386,7 @@ fn test_complete_primal_context_workflow() {
 #[test]
 fn test_security_level_progression() {
     let levels = vec![
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,

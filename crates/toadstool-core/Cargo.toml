@@ -10,6 +10,7 @@ keywords = ["hardware", "infrastructure", "compute", "npu"]
 categories = ["hardware-support", "development-tools"]
 
 [dependencies]
+cellmembrane-types.workspace = true
 toadstool-common = { path = "../core/common", default-features = false }
 thiserror = { workspace = true }
 tracing = { workspace = true }

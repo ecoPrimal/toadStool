@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use super::JsonRpcHandler;
-use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcRequest};
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt, ZeroCopyJsonRpcRequest};
 
 fn test_handler() -> JsonRpcHandler {
     let executor = Arc::new(crate::tarpc_server::WorkloadExecutorDispatch::Standalone(
@@ -20,9 +20,9 @@ fn test_handler() -> JsonRpcHandler {
     )
 }
 
-fn mk_request(method: &str, params: Option<serde_json::Value>, id: i32) -> JsonRpcRequest<'static> {
+fn mk_request(method: &str, params: Option<serde_json::Value>, id: i32) -> ZeroCopyJsonRpcRequest<'static> {
     JsonRpcRequest {
-        jsonrpc: Cow::Borrowed("2.0"),
+        jsonrpc: "2.0".into(),
         method: Cow::Owned(method.to_string()),
         params,
         id: Some(serde_json::json!(id)),

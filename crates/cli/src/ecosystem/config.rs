@@ -56,51 +56,10 @@ const fn default_health_check_interval() -> u64 {
     30
 }
 
-/// Discovery preferences
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DiscoveryConfig {
-    /// Enable environment variable discovery
-    #[serde(default = "default_true")]
-    pub enable_env: bool,
-
-    /// Enable configuration file discovery
-    #[serde(default = "default_true")]
-    pub enable_config: bool,
-
-    /// Enable mDNS discovery
-    #[serde(default = "default_false")]
-    pub enable_mdns: bool,
-
-    /// Enable service mesh discovery
-    #[serde(default = "default_false")]
-    pub enable_service_mesh: bool,
-
-    /// Discovery timeout (seconds)
-    #[serde(default = "default_discovery_timeout")]
-    pub timeout_seconds: u64,
-}
-
-const fn default_true() -> bool {
-    true
-}
-const fn default_false() -> bool {
-    false
-}
-const fn default_discovery_timeout() -> u64 {
-    10
-}
-
-impl Default for DiscoveryConfig {
-    fn default() -> Self {
-        Self {
-            enable_env: true,
-            enable_config: true,
-            enable_mdns: false,
-            enable_service_mesh: false,
-            timeout_seconds: 10,
-        }
-    }
-}
+// Canonical DiscoveryConfig from cellmembrane-types.
+// Local struct removed — was {enable_env, enable_config, enable_mdns, enable_service_mesh, timeout_seconds}.
+// Canonical: {methods, interval_secs, timeout_secs, max_services, cache_enabled, cache_ttl_secs, retries, enable_ipv6, fallbacks}.
+pub use cellmembrane_types::DiscoveryConfig;
 
 impl ServiceDiscoveryConfig {
     /// Load configuration from file
@@ -265,8 +224,7 @@ mod tests {
     fn test_default_config() {
         let config = ServiceDiscoveryConfig::default();
         assert!(config.services.is_empty());
-        assert!(config.discovery.enable_env);
-        assert!(config.discovery.enable_config);
+        assert!(config.discovery.cache_enabled);
     }
 
     #[test]
@@ -305,11 +263,9 @@ mod tests {
     #[test]
     fn test_discovery_config_default() {
         let config = DiscoveryConfig::default();
-        assert!(config.enable_env);
-        assert!(config.enable_config);
-        assert!(!config.enable_mdns);
-        assert!(!config.enable_service_mesh);
-        assert_eq!(config.timeout_seconds, 10);
+        assert!(config.cache_enabled);
+        assert_eq!(config.timeout_secs, 300);
+        assert_eq!(config.retries, 3);
     }
 
     #[test]

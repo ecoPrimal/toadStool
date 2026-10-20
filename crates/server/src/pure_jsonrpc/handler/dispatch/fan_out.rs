@@ -13,7 +13,7 @@ use serde::Deserialize;
 use super::DispatchHandler;
 use super::types::{FanOutAssignment, FanOutUnitStatus, FanOutWorkUnit, SubstrateFilter};
 use crate::pure_jsonrpc::handler::method_gate::CallerContext;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use std::sync::atomic::Ordering;
 
 impl DispatchHandler {

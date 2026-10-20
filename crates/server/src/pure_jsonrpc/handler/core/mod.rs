@@ -17,7 +17,7 @@ pub(crate) use identity::{
     capabilities_list, discover_capabilities, identity_get, primal_announce,
 };
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError};
 
 pub(super) type JsonRpcResult = Result<serde_json::Value, JsonRpcError>;
 

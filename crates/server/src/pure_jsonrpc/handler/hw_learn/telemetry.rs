@@ -3,7 +3,7 @@
 
 use super::HwLearnHandler;
 use super::helpers::check_thermal_for_bdf;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError};
 
 impl HwLearnHandler {
     /// `gpu.query_telemetry` — Report thermal, power, and per-unit silicon data.

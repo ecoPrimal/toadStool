@@ -140,18 +140,11 @@ pub enum MessagePriority {
     Emergency,
 }
 
-/// Health status for services and endpoints
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub enum HealthStatus {
-    /// Service is healthy
-    Healthy,
-    /// Service is degraded but functional
-    Degraded,
-    /// Service is unhealthy
-    Unhealthy,
-    /// Service status is unknown
-    Unknown,
-}
+// Canonical HealthStatus from cellmembrane-types (struct, not enum).
+// Local enum removed — was (Healthy, Degraded, Unhealthy, Unknown).
+// Use cellmembrane_types::HealthStatus { healthy: bool, message, checks, details, .. }.
+// For enum-like status, see cellmembrane_types::ServiceStatus.
+pub use cellmembrane_types::HealthStatus;
 
 /// Protocol message structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -194,36 +187,11 @@ pub struct ProtocolMessage {
     pub priority: MessagePriority,
 }
 
-/// Service information structure
-///
-/// Uses `Arc<str>` for id and name (wateringHole zero-copy): clone is refcount bump, not memcpy.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServiceInfo {
-    /// Service ID
-    pub id: Arc<str>,
-
-    /// Service name
-    pub name: Arc<str>,
-
-    /// Service version
-    pub version: String,
-
-    /// Service endpoints
-    pub endpoints: Vec<ServiceEndpoint>,
-
-    /// Service metadata
-    pub metadata: HashMap<String, String>,
-
-    /// Service health status
-    pub health_status: HealthStatus,
-
-    /// Last seen timestamp
-    #[serde(with = "toadstool_common::system_time_serde")]
-    pub last_seen: std::time::SystemTime,
-
-    /// Service capabilities
-    pub capabilities: Vec<String>,
-}
+// Canonical ServiceInfo from cellmembrane-types.
+// Local struct removed — was {id: Arc<str>, name: Arc<str>, version, endpoints: Vec<ServiceEndpoint>, metadata, health_status, last_seen, capabilities}.
+// Canonical uses String (not Arc<str>), endpoints: Vec<String>, status: ServiceStatus, metadata: HashMap<String,String>.
+// Extra fields (last_seen, health_status as HealthStatus struct) go in metadata.
+pub use cellmembrane_types::ServiceInfo;
 
 /// Service endpoint information
 #[derive(Debug, Clone, Serialize, Deserialize)]

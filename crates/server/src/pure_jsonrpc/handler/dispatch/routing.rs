@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Resolve BDF and dispatch mode from request params with a single GPU scan.
 ///

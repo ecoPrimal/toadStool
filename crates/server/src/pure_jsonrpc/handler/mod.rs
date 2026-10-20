@@ -33,7 +33,6 @@ mod sovereign;
 mod transport;
 mod workload;
 
-use std::borrow::Cow;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -45,7 +44,7 @@ pub use method_gate::{
     CallerContext, ConnectionTransport, ConnectionTrustHints, DispatchTrustLevel,
 };
 
-use super::types::{JSONRPC_VERSION, JsonRpcError, JsonRpcRequest, JsonRpcResponse};
+use super::types::{JSONRPC_VERSION, JsonRpcError, JsonRpcErrorExt, JsonRpcResponse, ZeroCopyJsonRpcRequest};
 
 use dispatch::DispatchHandler;
 #[cfg(target_os = "linux")]
@@ -269,7 +268,7 @@ impl JsonRpcHandler {
     /// Handle a JSON-RPC request (main entry point).
     ///
     /// Pattern: parse → validate → resolve → route → execute → respond
-    pub async fn handle_request(&self, request: &JsonRpcRequest<'_>) -> JsonRpcResponse {
+    pub async fn handle_request(&self, request: &ZeroCopyJsonRpcRequest<'_>) -> JsonRpcResponse {
         self.handle_request_with_connection(request, ConnectionTrustHints::default())
             .await
     }
@@ -277,7 +276,7 @@ impl JsonRpcHandler {
     /// Handle a JSON-RPC request with per-connection trust hints.
     pub async fn handle_request_with_connection(
         &self,
-        request: &JsonRpcRequest<'_>,
+        request: &ZeroCopyJsonRpcRequest<'_>,
         conn: ConnectionTrustHints,
     ) -> JsonRpcResponse {
         let id = request.id.clone().unwrap_or(serde_json::Value::Null);
@@ -285,7 +284,7 @@ impl JsonRpcHandler {
         if request.jsonrpc != JSONRPC_VERSION {
             self.error_count.fetch_add(1, Ordering::Relaxed);
             return JsonRpcResponse {
-                jsonrpc: Cow::Borrowed(JSONRPC_VERSION),
+                jsonrpc: "2.0".into(),
                 result: None,
                 error: Some(JsonRpcError::invalid_request(
                     "Invalid JSON-RPC version (must be '2.0')",
@@ -301,7 +300,7 @@ impl JsonRpcHandler {
             .await
         {
             Ok(result) => JsonRpcResponse {
-                jsonrpc: Cow::Borrowed(JSONRPC_VERSION),
+                jsonrpc: "2.0".into(),
                 result: Some(result),
                 error: None,
                 id,
@@ -314,7 +313,7 @@ impl JsonRpcHandler {
                     "JSON-RPC error",
                 );
                 JsonRpcResponse {
-                    jsonrpc: Cow::Borrowed(JSONRPC_VERSION),
+                    jsonrpc: "2.0".into(),
                     result: None,
                     error: Some(err),
                     id,

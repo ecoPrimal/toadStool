@@ -21,6 +21,9 @@ toadstool-config = { path = "../core/config", default-features = false }
 # Async runtime (optional — gated behind `runtime` for WASM compat)
 tokio = { workspace = true, optional = true }
 
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Workspace dependencies
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

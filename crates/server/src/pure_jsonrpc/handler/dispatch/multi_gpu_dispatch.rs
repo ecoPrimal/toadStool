@@ -5,7 +5,7 @@
 //! uses `WorkloadRouter::route_multi_gpu` for topology-aware placement,
 //! then dispatches the shader on each selected adapter and aggregates results.
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 use super::DispatchHandler;
 

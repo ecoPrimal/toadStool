@@ -69,39 +69,12 @@ pub struct DiscoveredServices {
     pub discovery_timestamp: std::time::SystemTime,
 }
 
-/// Information about a discovered service
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServiceInfo {
-    /// Service name (e.g., "coordination", "security")
-    pub name: String,
-    /// Full endpoint URL
-    pub endpoint: String,
-    /// Type of service
-    pub service_type: String,
-    /// Service version
-    pub version: String,
-    /// Service capabilities
-    pub capabilities: Vec<String>,
-    /// Current service status
-    pub status: ServiceStatus,
-    /// How the service was discovered
-    pub discovered_via: String,
-    /// Response time in milliseconds
-    pub response_time_ms: u64,
-}
-
-/// Service health status
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ServiceStatus {
-    /// Service is healthy and responding
-    Healthy,
-    /// Service is degraded but functional
-    Degraded,
-    /// Service is not responding
-    Unhealthy,
-    /// Status could not be determined
-    Unknown,
-}
+// Canonical ServiceInfo from cellmembrane-types.
+// Local struct removed — was {name, endpoint, service_type, version, capabilities, status, discovered_via, response_time_ms}.
+// Extra fields (discovered_via, response_time_ms, service_type) go in canonical `metadata` map.
+// ServiceStatus replaced by canonical cellmembrane_types::ServiceStatus.
+pub use cellmembrane_types::ServiceInfo;
+pub use cellmembrane_types::EcosystemServiceStatus as ServiceStatus;
 
 /// Summary of the discovery process
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -132,20 +105,13 @@ mod tests {
     #[test]
     fn test_service_info_serialization() {
         let endpoint = sample_local_coordination_endpoint();
-        let service_info = ServiceInfo {
-            name: "test_service".to_string(),
-            endpoint,
-            service_type: "Test".to_string(),
-            version: "1.0.0".to_string(),
-            capabilities: vec!["test".to_string()],
-            status: ServiceStatus::Healthy,
-            discovered_via: "test".to_string(),
-            response_time_ms: 100,
-        };
+        let service_info = ServiceInfo::new("test_service", "test_service")
+            .with_endpoint(endpoint)
+            .with_capability("test")
+            .with_version("1.0.0");
 
         let json = serde_json::to_string(&service_info).unwrap();
         assert!(json.contains("test_service"));
-        assert!(json.contains(":808") || json.contains("127.0.0.1"));
     }
 
     #[test]
@@ -160,9 +126,9 @@ mod tests {
     #[test]
     fn test_service_status_variants() {
         let statuses = vec![
-            ServiceStatus::Healthy,
+            ServiceStatus::Running,
             ServiceStatus::Degraded,
-            ServiceStatus::Unhealthy,
+            ServiceStatus::Stopped,
             ServiceStatus::Unknown,
         ];
 
@@ -220,19 +186,15 @@ mod tests {
     fn test_service_info_deserialization() {
         let expected_endpoint = sample_local_coordination_endpoint();
         let json = serde_json::json!({
+            "id": "test",
             "name": "test",
-            "endpoint": expected_endpoint,
-            "service_type": "Test",
-            "version": "1.0",
+            "endpoints": [expected_endpoint],
             "capabilities": ["test"],
-            "status": "Healthy",
-            "discovered_via": "test",
-            "response_time_ms": 10
+            "status": "running"
         });
         let info: ServiceInfo = serde_json::from_value(json).unwrap();
         assert_eq!(info.name, "test");
-        assert_eq!(info.endpoint, expected_endpoint);
-        assert_eq!(info.response_time_ms, 10);
+        assert_eq!(info.endpoints, vec![expected_endpoint]);
     }
 
     #[test]

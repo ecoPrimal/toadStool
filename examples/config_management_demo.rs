@@ -146,7 +146,6 @@ async fn demonstrate_new_environment_aware_approach() -> Result<(), Box<dyn std:
     let fallbacks = build_capability_fallbacks_from_config(&bind_host);
 
     let config = DiscoveryConfig {
-        enable_mdns: true,
         fallbacks: fallbacks.clone(),
         ..Default::default()
     };
@@ -353,7 +352,6 @@ async fn demonstrate_service_discovery() -> Result<(), Box<dyn std::error::Error
 
     let fallbacks = build_capability_fallbacks_from_config(&ConfigUtils::get_bind_address());
     let config = DiscoveryConfig {
-        enable_mdns: true,
         fallbacks,
         ..Default::default()
     };

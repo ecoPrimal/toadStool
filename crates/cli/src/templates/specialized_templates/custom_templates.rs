@@ -9,7 +9,7 @@ use super::super::basic_templates::TemplateComponents;
 use super::super::constants::{commands, registries, service_names, versions};
 use super::super::types_mod::CustomTemplateSpec;
 use crate::{
-    HealthCheck, PrimalConfig, ServiceConfig, ServicePort, ServiceResources, WorkloadSource,
+    HealthCheckConfig, PrimalConfig, ServiceConfig, ServicePort, ServiceResources, WorkloadSource,
 };
 
 /// Create custom template from user specification
@@ -36,7 +36,7 @@ pub fn create_custom_template(spec: &CustomTemplateSpec) -> TemplateComponents {
                     enabled: true,
                     config: HashMap::new(),
                     dependencies: vec![service_names::CRYPTO.to_string()],
-                    health_check: Some(HealthCheck {
+                    health_check: Some(HealthCheckConfig {
                         command: vec![primal_name.clone(), commands::HEALTH.to_string()],
                         interval: 30,
                         timeout: 10,

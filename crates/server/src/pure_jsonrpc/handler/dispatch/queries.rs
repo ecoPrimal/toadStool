@@ -2,7 +2,7 @@
 
 use super::DispatchHandler;
 use super::types::DispatchStatus;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 impl DispatchHandler {
     pub async fn dispatch_status(
@@ -81,7 +81,7 @@ mod tests {
     use std::sync::Arc;
 
     use super::DispatchHandler;
-    use crate::pure_jsonrpc::types::JsonRpcError;
+    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
     use crate::visualization_client::VisualizationClient;
 
     fn test_handler() -> DispatchHandler {

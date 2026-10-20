@@ -10,7 +10,7 @@ use toadstool_core::HardwareTransport;
 use toadstool_display::{HardwareTransportDispatch, TransportRouter};
 use tokio_util::sync::CancellationToken;
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Active stream metadata tracked by the handler.
 struct ActiveStream {

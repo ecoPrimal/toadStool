@@ -4,18 +4,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// Security level for primal operations
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub enum SecurityLevel {
-    /// Basic security
-    Basic,
-    /// Standard security
-    Standard,
-    /// High security
-    High,
-    /// Maximum security
-    Maximum,
-}
+// Canonical SecurityLevel from cellmembrane-types.
+// Local enum removed — was (Basic, Standard, High, Maximum).
+// Mapping: Basic→None, Standard→Standard, High→High, Maximum→Maximum.
+pub use cellmembrane_types::SecurityLevel;
 
 /// Network location information
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]

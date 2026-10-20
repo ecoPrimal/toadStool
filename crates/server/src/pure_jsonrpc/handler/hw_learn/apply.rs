@@ -3,7 +3,7 @@
 
 use super::HwLearnHandler;
 use super::helpers::{check_thermal_for_bdf, resolve_bdf};
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 impl HwLearnHandler {
     /// `compute.hardware.apply` — Apply a recipe (dry-run or live BAR0).

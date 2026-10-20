@@ -111,8 +111,8 @@ impl CapabilityDiscovery {
 
         Ok(Self {
             discovery,
-            timeout: config.timeout,
-            enable_localhost_fallback: config.enable_localhost_fallback,
+            timeout: std::time::Duration::from_secs(config.timeout_secs),
+            enable_localhost_fallback: config.fallbacks.contains_key("localhost"),
         })
     }
 

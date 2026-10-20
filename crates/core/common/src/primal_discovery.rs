@@ -120,34 +120,10 @@ pub struct PrimalDiscovery {
     config: Arc<DiscoveryConfig>,
 }
 
-/// Discovery configuration
-#[derive(Clone)]
-pub struct DiscoveryConfig {
-    /// Cache TTL
-    pub cache_ttl: Duration,
-
-    /// Health check interval
-    pub health_check_interval: Duration,
-
-    /// Configured fallback endpoints by capability
-    pub fallbacks: HashMap<String, String>,
-
-    /// Enable mDNS discovery
-    pub enable_mdns: bool,
-}
-
-impl Default for DiscoveryConfig {
-    fn default() -> Self {
-        const DEFAULT_CACHE_TTL_SECS: u64 = 300;
-        const DEFAULT_HEALTH_CHECK_INTERVAL_SECS: u64 = 30;
-        Self {
-            cache_ttl: Duration::from_secs(DEFAULT_CACHE_TTL_SECS),
-            health_check_interval: Duration::from_secs(DEFAULT_HEALTH_CHECK_INTERVAL_SECS),
-            fallbacks: HashMap::new(),
-            enable_mdns: true,
-        }
-    }
-}
+// Canonical DiscoveryConfig from cellmembrane-types.
+// Local struct removed — was {cache_ttl, health_check_interval, fallbacks, enable_mdns}.
+// Canonical: {methods, interval_secs, timeout_secs, max_services, cache_enabled, cache_ttl_secs, retries, enable_ipv6, fallbacks}.
+pub use cellmembrane_types::DiscoveryConfig;
 
 impl PrimalDiscovery {
     /// Create new discovery engine
@@ -204,14 +180,14 @@ impl PrimalDiscovery {
     ) -> Result<PrimalEndpoint, DiscoveryError> {
         // 1. Check cache
         if let Some(cached) = self.get_from_cache(capability).await
-            && cached.is_fresh(self.config.cache_ttl)
+            && cached.is_fresh(Duration::from_secs(self.config.cache_ttl_secs))
         {
             tracing::debug!("Cache hit for capability: {}", capability);
             return Ok(cached);
         }
 
         // 2. Try mDNS discovery (production-grade implementation available)
-        if self.config.enable_mdns {
+        if self.config.methods.iter().any(|m| m == "mdns") {
             // Production implementation: Use infant_discovery module
             // See: crates/core/common/src/infant_discovery/ for mDNS implementation
             tracing::debug!(

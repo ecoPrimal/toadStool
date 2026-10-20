@@ -33,8 +33,8 @@ pub use unix::{
 
 use crate::errors::{ServerError, ServerResult};
 use crate::pure_jsonrpc::handler::ConnectionTrustHints;
-use crate::pure_jsonrpc::types::JsonRpcError;
-use crate::pure_jsonrpc::{JsonRpcHandler, JsonRpcRequest, JsonRpcResponse};
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
+use crate::pure_jsonrpc::{JsonRpcHandler, JsonRpcResponse, ZeroCopyJsonRpcRequest};
 
 /// riboCipher transport signal constants.
 ///
@@ -72,11 +72,11 @@ pub async fn process_request(
     body: &[u8],
     conn: ConnectionTrustHints,
 ) -> ServerResult<Vec<u8>> {
-    let request: JsonRpcRequest = match serde_json::from_slice(body) {
+    let request: ZeroCopyJsonRpcRequest<'_> = match serde_json::from_slice(body) {
         Ok(r) => r,
         Err(e) => {
             let response = JsonRpcResponse {
-                jsonrpc: std::borrow::Cow::Borrowed(toadstool_common::constants::jsonrpc::VERSION),
+                jsonrpc: "2.0".into(),
                 result: None,
                 error: Some(JsonRpcError::parse_error(format!("Parse error: {e}"))),
                 id: serde_json::Value::Null,

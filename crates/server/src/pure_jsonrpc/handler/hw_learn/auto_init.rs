@@ -3,7 +3,7 @@
 
 use super::HwLearnHandler;
 use super::helpers::check_thermal_for_bdf;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Per-GPU init work (runs in spawn_blocking when parallel).
 fn init_one_gpu(

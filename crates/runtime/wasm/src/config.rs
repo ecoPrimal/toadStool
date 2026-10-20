@@ -10,34 +10,11 @@ const WASM_MODULE_CACHE_TTL_HOURS: u64 = 24;
 
 use toadstool_common::config_bases::CacheConfig;
 
-/// Security isolation level for WebAssembly execution
-///
-/// Defines the security posture and resource isolation guarantees
-/// for WASM module execution.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum SecurityLevel {
-    /// No isolation (testing only)
-    None,
-    /// Basic sandboxing
-    Basic,
-    /// Strict isolation (recommended for production)
-    #[default]
-    Strict,
-    /// Maximum security with all restrictions
-    Maximum,
-}
-
-impl SecurityLevel {
-    /// Returns true if this security level enforces memory limits
-    pub const fn enforces_memory_limits(&self) -> bool {
-        matches!(self, Self::Strict | Self::Maximum)
-    }
-
-    /// Returns true if this security level requires fuel tracking
-    pub const fn requires_fuel_tracking(&self) -> bool {
-        matches!(self, Self::Maximum)
-    }
-}
+// Canonical SecurityLevel from cellmembrane-types.
+// Local enum removed — was (None, Basic, Strict, Maximum).
+// Mapping: None→None, Basic→Standard, Strict→High, Maximum→Maximum.
+// Canonical already provides enforces_memory_limits() and requires_hardware().
+pub use cellmembrane_types::SecurityLevel;
 
 /// Configuration for WebAssembly runtime engine
 ///
@@ -79,7 +56,7 @@ impl Default for WasmRuntimeConfig {
                 ttl: Duration::from_secs(WASM_MODULE_CACHE_TTL_HOURS * 3600),
                 ..CacheConfig::default()
             },
-            security_level: SecurityLevel::Strict,
+            security_level: SecurityLevel::High,
             max_memory_mb: 128,
             max_pages: 2048,
             execution_timeout_ms: 30000,
@@ -227,7 +204,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = WasmRuntimeConfig::default();
-        assert_eq!(config.security_level, SecurityLevel::Strict);
+        assert_eq!(config.security_level, SecurityLevel::High);
         assert_eq!(config.max_memory_mb, 128);
         assert!(config.fuel_limit.is_some());
     }

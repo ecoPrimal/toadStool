@@ -4,7 +4,7 @@
 use super::DispatchHandler;
 use crate::pure_jsonrpc::handler::dispatch::submit_params as submit;
 use crate::pure_jsonrpc::handler::method_gate::CallerContext;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use std::sync::atomic::Ordering;
 
 impl DispatchHandler {

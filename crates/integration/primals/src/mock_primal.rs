@@ -82,11 +82,7 @@ impl PrimalIntegration for MockPrimal {
         &self,
     ) -> Pin<Box<dyn Future<Output = ToadStoolResult<HealthStatus>> + Send + '_>> {
         Box::pin(async {
-            Ok(HealthStatus {
-                healthy: true,
-                checks: vec![],
-                last_check: std::time::SystemTime::now(),
-            })
+            Ok(HealthStatus::ok())
         })
     }
 

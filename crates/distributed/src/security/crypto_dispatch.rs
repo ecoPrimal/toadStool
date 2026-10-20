@@ -32,7 +32,7 @@ impl toadstool::encryption::CryptoProvider for DistributedCryptoProvider {
 
         CAPABILITIES.get_or_init(|| toadstool::encryption::CryptoCapability {
             algorithms: vec!["chacha20poly1305".to_string(), "aes-256-gcm".to_string()],
-            security_level: toadstool::encryption::SecurityLevel::Enhanced,
+            security_level: toadstool::encryption::SecurityLevel::High,
             hardware_backed: false,
         })
     }
@@ -61,11 +61,11 @@ impl toadstool::encryption::CryptoProvider for DistributedCryptoProvider {
                     toadstool::encryption::SecurityLevel::Standard => {
                         super::types::SecurityLevel::Standard
                     }
-                    toadstool::encryption::SecurityLevel::Enhanced => {
-                        super::types::SecurityLevel::Enhanced
+                    toadstool::encryption::SecurityLevel::High => {
+                        super::types::SecurityLevel::High
                     }
-                    toadstool::encryption::SecurityLevel::HardwareSecured => {
-                        super::types::SecurityLevel::HardwareSecured
+                    toadstool::encryption::SecurityLevel::Maximum => {
+                        super::types::SecurityLevel::Maximum
                     }
                 },
             };
@@ -108,11 +108,11 @@ impl toadstool::encryption::CryptoProvider for DistributedCryptoProvider {
                     toadstool::encryption::SecurityLevel::Standard => {
                         super::types::SecurityLevel::Standard
                     }
-                    toadstool::encryption::SecurityLevel::Enhanced => {
-                        super::types::SecurityLevel::Enhanced
+                    toadstool::encryption::SecurityLevel::High => {
+                        super::types::SecurityLevel::High
                     }
-                    toadstool::encryption::SecurityLevel::HardwareSecured => {
-                        super::types::SecurityLevel::HardwareSecured
+                    toadstool::encryption::SecurityLevel::Maximum => {
+                        super::types::SecurityLevel::Maximum
                     }
                 },
             };
@@ -138,11 +138,11 @@ impl toadstool::encryption::CryptoProvider for DistributedCryptoProvider {
                     toadstool::encryption::SecurityLevel::Standard => {
                         super::types::SecurityLevel::Standard
                     }
-                    toadstool::encryption::SecurityLevel::Enhanced => {
-                        super::types::SecurityLevel::Enhanced
+                    toadstool::encryption::SecurityLevel::High => {
+                        super::types::SecurityLevel::High
                     }
-                    toadstool::encryption::SecurityLevel::HardwareSecured => {
-                        super::types::SecurityLevel::HardwareSecured
+                    toadstool::encryption::SecurityLevel::Maximum => {
+                        super::types::SecurityLevel::Maximum
                     }
                 }),
             };

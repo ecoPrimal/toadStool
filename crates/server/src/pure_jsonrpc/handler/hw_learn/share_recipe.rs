@@ -2,7 +2,7 @@
 //! Share recipe handler — save, load, or list recipes.
 
 use super::HwLearnHandler;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 impl HwLearnHandler {
     /// `compute.hardware.share_recipe` — Save, load, or list recipes.

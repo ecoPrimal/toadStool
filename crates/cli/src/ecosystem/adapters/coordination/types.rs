@@ -5,20 +5,11 @@
 //! services, interprets discovery results, or holds lock handles from the
 //! coordination capability layer.
 
-use std::collections::HashMap;
 
-/// Service information for registration
-#[derive(Debug, Clone)]
-pub struct ServiceInfo {
-    /// Service name
-    pub name: String,
-    /// Capability IDs this service provides
-    pub capabilities: Vec<String>,
-    /// Service endpoint URL
-    pub endpoint: String,
-    /// Optional metadata key-value pairs
-    pub metadata: HashMap<String, String>,
-}
+// Canonical ServiceInfo from cellmembrane-types.
+// Local struct removed — was {name, capabilities, endpoint, metadata}.
+// Canonical: {id, name, version, endpoints: Vec<String>, capabilities, status, metadata}.
+pub use cellmembrane_types::ServiceInfo;
 
 /// Registration token from coordination service
 #[derive(Debug, Clone)]

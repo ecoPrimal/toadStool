@@ -3,7 +3,7 @@
 
 use super::HwLearnHandler;
 use super::helpers::vendor_name;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError};
 
 impl HwLearnHandler {
     /// `compute.hardware.vfio_devices` — Discover GPUs bound to vfio-pci.

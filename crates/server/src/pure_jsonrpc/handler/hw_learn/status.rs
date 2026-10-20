@@ -2,7 +2,7 @@
 //! Status handler — report hw-learn pipeline state and firmware inventory.
 
 use super::HwLearnHandler;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError};
 use tracing::warn;
 
 impl HwLearnHandler {

@@ -60,7 +60,7 @@ impl CoordinationAdapter {
             json!({
                 "name": service_info.name,
                 "capabilities": service_info.capabilities,
-                "endpoint": service_info.endpoint,
+                "endpoint": service_info.endpoints.first().unwrap_or(&String::new()),
                 "metadata": service_info.metadata,
             }),
         );

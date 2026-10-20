@@ -36,7 +36,10 @@ pub use connection::{process_request, serve_tcp};
 #[cfg(target_os = "linux")]
 pub use handler::HwLearnHandler;
 pub use handler::JsonRpcHandler;
-pub use types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse, JsonWorkloadSubmission};
+pub use types::{
+    JsonRpcError, JsonRpcErrorExt, JsonRpcRequest, JsonRpcResponse, JsonWorkloadSubmission,
+    ZeroCopyJsonRpcRequest,
+};
 
 #[cfg(test)]
 mod tests;

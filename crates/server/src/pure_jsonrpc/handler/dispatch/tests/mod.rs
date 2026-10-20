@@ -11,7 +11,7 @@ mod trio_contract;
 use std::sync::Arc;
 
 use super::DispatchHandler;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 fn test_handler() -> DispatchHandler {
     DispatchHandler::new(

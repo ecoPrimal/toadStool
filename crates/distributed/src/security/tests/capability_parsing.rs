@@ -18,7 +18,7 @@ fn test_parse_capabilities_from_json_full() {
     assert_eq!(cap.algorithms, vec!["aes-256-gcm", "chacha20poly1305"]);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
     assert!(cap.hardware_backed);
 }
@@ -47,7 +47,7 @@ fn test_parse_capabilities_from_json_hardware_secured() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::HardwareSecured
+        toadstool::encryption::SecurityLevel::Maximum
     ));
 }
 
@@ -59,7 +59,7 @@ fn test_parse_capabilities_from_json_hardware_alias() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::HardwareSecured
+        toadstool::encryption::SecurityLevel::Maximum
     ));
 }
 
@@ -73,7 +73,7 @@ fn test_parse_capabilities_from_json_empty_defaults() {
     );
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
     assert!(!cap.hardware_backed);
 }
@@ -86,7 +86,7 @@ fn test_parse_capabilities_from_json_unknown_level_defaults_to_enhanced() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
 }
 
@@ -109,7 +109,7 @@ fn test_encryption_request_construction_for_encrypt() {
         data: vec![0x01, 0x02, 0x03, 0x04, 0x05],
         key_id: Some("enc-key-1".to_string()),
         algorithm: Some("aes-256-gcm".to_string()),
-        security_level: SecurityLevel::Enhanced,
+        security_level: SecurityLevel::High,
     };
     let params = serde_json::to_value(&request).unwrap();
     assert!(params.get("operation").is_some());
@@ -136,7 +136,7 @@ fn test_key_management_request_construction_generate() {
         request_id: uuid::Uuid::new_v4(),
         operation: KeyOperation::Generate,
         key_id: None,
-        security_level: Some(SecurityLevel::HardwareSecured),
+        security_level: Some(SecurityLevel::Maximum),
     };
     let params = serde_json::to_value(&request).unwrap();
     assert!(params.get("operation").is_some());

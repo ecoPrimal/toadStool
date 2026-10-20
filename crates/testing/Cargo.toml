@@ -14,6 +14,9 @@ categories = ["development-tools::testing"]
 readme = "README.md"
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Core ToadStool dependencies
 toadstool = { path = "../core/toadstool", features = ["test-mocks"] }
 toadstool-common = { path = "../core/common" }

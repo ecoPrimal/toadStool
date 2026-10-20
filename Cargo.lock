@@ -3779,6 +3779,7 @@ version = "0.2.0"
 dependencies = [
  "base64",
  "bytes",
+ "cellmembrane-types",
  "futures",
  "mdns-sd",
  "proptest",
@@ -3803,6 +3804,7 @@ dependencies = [
 name = "toadstool-auto-config"
 version = "0.2.0"
 dependencies = [
+ "cellmembrane-types",
  "serde",
  "serde_json",
  "temp-env",
@@ -3828,6 +3830,7 @@ dependencies = [
  "base64",
  "blake3",
  "bytes",
+ "cellmembrane-types",
  "clap",
  "colored",
  "etcetera",
@@ -3894,6 +3897,7 @@ name = "toadstool-common"
 version = "0.2.0"
 dependencies = [
  "base64",
+ "cellmembrane-types",
  "chacha20poly1305",
  "hkdf",
  "hmac",
@@ -3923,6 +3927,7 @@ name = "toadstool-config"
 version = "0.2.0"
 dependencies = [
  "approx",
+ "cellmembrane-types",
  "etcetera",
  "serde",
  "serde_json",
@@ -3942,6 +3947,7 @@ name = "toadstool-core"
 version = "0.2.0"
 dependencies = [
  "bytes",
+ "cellmembrane-types",
  "humantime-serde",
  "serde",
  "serde_json",
@@ -4006,6 +4012,7 @@ dependencies = [
  "anyhow",
  "base64",
  "bytes",
+ "cellmembrane-types",
  "ed25519-dalek",
  "futures",
  "humantime-serde",
@@ -4096,6 +4103,7 @@ dependencies = [
 name = "toadstool-integration-primals"
 version = "0.2.0"
 dependencies = [
+ "cellmembrane-types",
  "mockall",
  "proptest",
  "serde",
@@ -4116,6 +4124,7 @@ name = "toadstool-integration-protocols"
 version = "0.2.0"
 dependencies = [
  "bytes",
+ "cellmembrane-types",
  "futures",
  "serde",
  "serde_json",
@@ -4387,6 +4396,7 @@ name = "toadstool-runtime-wasm"
 version = "0.2.0"
 dependencies = [
  "bytes",
+ "cellmembrane-types",
  "futures",
  "serde",
  "serde_json",
@@ -4464,6 +4474,7 @@ version = "0.2.0"
 dependencies = [
  "base64",
  "bytes",
+ "cellmembrane-types",
  "futures",
  "hw-learn",
  "nvpmu",
@@ -4519,6 +4530,7 @@ name = "toadstool-testing"
 version = "0.2.0"
 dependencies = [
  "bytes",
+ "cellmembrane-types",
  "criterion",
  "fake",
  "futures",

@@ -54,7 +54,7 @@ fn test_parse_capabilities_security_level_enhanced() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
 }
 
@@ -88,7 +88,7 @@ fn test_parse_capabilities_hardware_secured() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::HardwareSecured
+        toadstool::encryption::SecurityLevel::Maximum
     ));
     assert!(cap.hardware_backed);
 }
@@ -101,7 +101,7 @@ fn test_parse_capabilities_hardware_variant() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::HardwareSecured
+        toadstool::encryption::SecurityLevel::Maximum
     ));
 }
 
@@ -115,7 +115,7 @@ fn test_parse_capabilities_empty_response_uses_defaults() {
     );
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
     assert!(!cap.hardware_backed);
 }
@@ -128,7 +128,7 @@ fn test_parse_capabilities_unknown_security_level_defaults_to_enhanced() {
     let cap = SecurityClient::parse_capabilities_from_json(&json);
     assert!(matches!(
         cap.security_level,
-        toadstool::encryption::SecurityLevel::Enhanced
+        toadstool::encryption::SecurityLevel::High
     ));
 }
 

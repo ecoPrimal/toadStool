@@ -2,7 +2,7 @@
 //! Device handle and DMA lifecycle — pool/cache queries and ember DMA prep/cleanup.
 
 use super::DispatchHandler;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 impl DispatchHandler {
     /// Check whether a BDF has an active ember device handle or cached VFIO session.

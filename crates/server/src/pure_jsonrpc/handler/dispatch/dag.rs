@@ -7,7 +7,7 @@
 use std::collections::HashMap;
 
 use super::types::PipelineStageRequest;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
 /// Parse `"edges"` from the request as `Vec<(String, String)>`.
 pub(super) fn parse_edges(p: &serde_json::Value) -> Result<Vec<(String, String)>, JsonRpcError> {

@@ -9,6 +9,9 @@ keywords = ["wasm", "webassembly", "wasmi", "wasi"]
 categories = ["wasm", "development-tools"]
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Core ToadStool dependencies
 toadstool = { path = "../../core/toadstool", default-features = false }
 toadstool-common = { path = "../../core/common", default-features = false }

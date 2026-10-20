@@ -16,7 +16,7 @@ use super::DispatchHandler;
 use super::dag::{parse_edges, topological_sort};
 use super::types::{PipelineJob, PipelineStageRequest, PipelineStageResult, PipelineStatus};
 use crate::pure_jsonrpc::handler::method_gate::CallerContext;
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use std::sync::atomic::Ordering;
 
 impl DispatchHandler {
@@ -99,7 +99,7 @@ impl DispatchHandler {
                     "job_id": &pipeline_id,
                     "status": "failed",
                     "output": null,
-                    "error": graph_err.message.as_ref(),
+                    "error": graph_err.message.as_str(),
                     "metadata": {
                         "name": &name,
                         "stage_count": stages.len(),
@@ -208,7 +208,7 @@ impl DispatchHandler {
                     completed_results.insert(stage_id.clone(), value);
                 }
                 Err(e) => {
-                    let error_msg = e.message.into_owned();
+                    let error_msg = e.message.clone();
                     stage_results.push(PipelineStageResult {
                         stage_id: stage_id.clone(),
                         method: stage.method.clone(),

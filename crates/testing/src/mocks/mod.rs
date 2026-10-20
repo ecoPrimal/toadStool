@@ -35,9 +35,9 @@ pub use runtime_engines::MockRuntimeEngine;
 pub use v4l2::{CaptureFormat, FramePattern, MockV4l2Config, MockV4l2Device, MockV4l2Error};
 pub use vfio::{AccessOp, MockVfioDevice, MockVfioError, RegisterAccessEntry};
 
+pub use cellmembrane_types::SecurityLevel;
 pub use lightweight::{
-    MockConfigLoader, MockSecurityContext, MockWorkloadSpec, ResourceRequirements, SecurityLevel,
-    WorkloadType,
+    MockConfigLoader, MockSecurityContext, MockWorkloadSpec, ResourceRequirements, WorkloadType,
 };
 
 /// Lightweight test doubles for configuration, security, and workload testing.
@@ -97,18 +97,10 @@ pub mod lightweight {
         isolation_enabled: bool,
     }
 
-    /// Security level for mock security contexts
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub enum SecurityLevel {
-        /// Low security (permissive)
-        Low,
-        /// Medium security (default)
-        Medium,
-        /// High security (restrictive)
-        High,
-        /// Critical security (minimal permissions)
-        Critical,
-    }
+    // Canonical SecurityLevel from cellmembrane-types.
+    // Local enum removed — was (Low, Medium, High, Critical).
+    // Mapping: Low→None, Medium→Standard, High→High, Critical→Maximum.
+    pub use cellmembrane_types::SecurityLevel;
 
     impl Default for MockSecurityContext {
         fn default() -> Self {
@@ -121,7 +113,7 @@ pub mod lightweight {
         #[must_use]
         pub fn new() -> Self {
             Self {
-                security_level: SecurityLevel::Medium,
+                security_level: SecurityLevel::Standard,
                 permissions: vec![
                     "read".to_string(),
                     "write".to_string(),
@@ -145,7 +137,7 @@ pub mod lightweight {
         #[must_use]
         pub fn new_low_security() -> Self {
             Self {
-                security_level: SecurityLevel::Low,
+                security_level: SecurityLevel::None,
                 permissions: vec![
                     "read".to_string(),
                     "write".to_string(),
@@ -359,7 +351,7 @@ mod tests {
         assert!(!context.has_permission("network"));
 
         // Test security level
-        matches!(context.get_security_level(), SecurityLevel::Medium);
+        matches!(context.get_security_level(), SecurityLevel::Standard);
 
         // Test isolation
         assert!(context.is_isolation_enabled());

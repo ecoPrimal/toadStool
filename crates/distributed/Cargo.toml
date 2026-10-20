@@ -40,6 +40,9 @@ legacy-security = ["runtime"]
 legacy-scheduler = ["runtime"]
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types.workspace = true
+
 # Core ToadStool dependencies
 toadstool = { path = "../core/toadstool", default-features = false, optional = true }
 toadstool-core = { path = "../toadstool-core", default-features = false }

@@ -31,12 +31,11 @@
 // EVOLVED (Feb 14, 2026): Removed unused imports after localhost fallback removal
 // - DEFAULT_HTTP_PORT, primals, runtime_ports no longer needed
 use std::env;
-use std::time::Duration;
 
 use crate::interned_strings::socket_env;
 
-const DEFAULT_DISCOVERY_TIMEOUT_SECS: u64 = 5;
-const DEFAULT_CACHE_TTL_SECS: u64 = 60;
+const _DEFAULT_DISCOVERY_TIMEOUT_SECS: u64 = 5;
+const _DEFAULT_CACHE_TTL_SECS: u64 = 60;
 const PROD_DISCOVERY_TIMEOUT_SECS: u64 = 10;
 const PROD_CACHE_TTL_SECS: u64 = 300;
 const DEV_DISCOVERY_TIMEOUT_SECS: u64 = 2;
@@ -44,76 +43,46 @@ const DEV_CACHE_TTL_SECS: u64 = 10;
 const TEST_DISCOVERY_TIMEOUT_MS: u64 = 100;
 const TEST_CACHE_TTL_SECS: u64 = 1;
 
-/// Service discovery configuration
-#[derive(Debug, Clone)]
-pub struct DiscoveryConfig {
-    /// Enable fallback to localhost defaults if discovery fails
-    pub enable_localhost_fallback: bool,
+// Canonical DiscoveryConfig from cellmembrane-types.
+// Local struct removed — was {enable_localhost_fallback, timeout, max_retries, cache_ttl, allow_insecure}.
+// Canonical: {methods, interval_secs, timeout_secs, max_services, cache_enabled, cache_ttl_secs, retries, enable_ipv6, fallbacks}.
+pub use cellmembrane_types::DiscoveryConfig;
 
-    /// Discovery timeout
-    pub timeout: Duration,
-
-    /// Discovery retry attempts
-    pub max_retries: u32,
-
-    /// Cache discovered services (TTL)
-    pub cache_ttl: Duration,
-
-    /// Allow insecure connections in development
-    pub allow_insecure: bool,
+/// Environment-specific discovery config constructors (toadStool extensions).
+pub trait DiscoveryConfigExt {
+    /// Production configuration (strict, no fallbacks).
+    fn production() -> DiscoveryConfig;
+    /// Development configuration (permissive, with fallbacks).
+    fn development() -> DiscoveryConfig;
+    /// Test configuration (fast, local only).
+    fn test_config() -> DiscoveryConfig;
 }
 
-impl Default for DiscoveryConfig {
-    fn default() -> Self {
-        let is_production = env::var(socket_env::TOADSTOOL_ENV)
-            .unwrap_or_else(|_| "development".to_string())
-            == "production";
-
-        Self {
-            // Only enable fallback in non-production
-            enable_localhost_fallback: !is_production,
-            timeout: Duration::from_secs(DEFAULT_DISCOVERY_TIMEOUT_SECS),
-            max_retries: 3,
-            cache_ttl: Duration::from_secs(DEFAULT_CACHE_TTL_SECS),
-            allow_insecure: !is_production,
-        }
-    }
-}
-
-impl DiscoveryConfig {
-    /// Create production configuration (strict, no fallbacks)
-    #[must_use]
-    pub const fn production() -> Self {
-        Self {
-            enable_localhost_fallback: false,
-            timeout: Duration::from_secs(PROD_DISCOVERY_TIMEOUT_SECS),
-            max_retries: 5,
-            cache_ttl: Duration::from_secs(PROD_CACHE_TTL_SECS),
-            allow_insecure: false,
+impl DiscoveryConfigExt for DiscoveryConfig {
+    fn production() -> DiscoveryConfig {
+        DiscoveryConfig {
+            timeout_secs: PROD_DISCOVERY_TIMEOUT_SECS,
+            cache_ttl_secs: PROD_CACHE_TTL_SECS,
+            retries: 5,
+            ..DiscoveryConfig::default()
         }
     }
 
-    /// Create development configuration (permissive, with fallbacks)
-    #[must_use]
-    pub const fn development() -> Self {
-        Self {
-            enable_localhost_fallback: true,
-            timeout: Duration::from_secs(DEV_DISCOVERY_TIMEOUT_SECS),
-            max_retries: 1,
-            cache_ttl: Duration::from_secs(DEV_CACHE_TTL_SECS),
-            allow_insecure: true,
+    fn development() -> DiscoveryConfig {
+        DiscoveryConfig {
+            timeout_secs: DEV_DISCOVERY_TIMEOUT_SECS,
+            cache_ttl_secs: DEV_CACHE_TTL_SECS,
+            retries: 1,
+            ..DiscoveryConfig::default()
         }
     }
 
-    /// Create test configuration (fast, local only)
-    #[must_use]
-    pub const fn test() -> Self {
-        Self {
-            enable_localhost_fallback: true,
-            timeout: Duration::from_millis(TEST_DISCOVERY_TIMEOUT_MS),
-            max_retries: 0,
-            cache_ttl: Duration::from_secs(TEST_CACHE_TTL_SECS),
-            allow_insecure: true,
+    fn test_config() -> DiscoveryConfig {
+        DiscoveryConfig {
+            timeout_secs: TEST_DISCOVERY_TIMEOUT_MS / 1000,
+            cache_ttl_secs: TEST_CACHE_TTL_SECS,
+            retries: 0,
+            ..DiscoveryConfig::default()
         }
     }
 }
@@ -203,31 +172,28 @@ mod tests {
     #[test]
     fn test_discovery_config_default() {
         let config = DiscoveryConfig::default();
-        // Should enable fallback in non-production (default)
-        assert!(config.enable_localhost_fallback);
+        assert!(config.cache_enabled);
+        assert_eq!(config.retries, 3);
     }
 
     #[test]
     fn test_discovery_config_production() {
         let config = DiscoveryConfig::production();
-        // Should NOT enable fallback in production
-        assert!(!config.enable_localhost_fallback);
-        assert!(!config.allow_insecure);
+        assert_eq!(config.retries, 5);
+        assert_eq!(config.timeout_secs, PROD_DISCOVERY_TIMEOUT_SECS);
     }
 
     #[test]
     fn test_discovery_config_development() {
         let config = DiscoveryConfig::development();
-        // Should enable fallback in development
-        assert!(config.enable_localhost_fallback);
-        assert!(config.allow_insecure);
+        assert_eq!(config.retries, 1);
+        assert_eq!(config.timeout_secs, DEV_DISCOVERY_TIMEOUT_SECS);
     }
 
     #[test]
     fn test_discovery_config_test() {
-        let config = DiscoveryConfig::test();
-        assert!(config.enable_localhost_fallback);
-        assert_eq!(config.max_retries, 0); // Fast fail in tests
+        let config = DiscoveryConfig::test_config();
+        assert_eq!(config.retries, 0);
     }
 
     #[test]
@@ -269,8 +235,7 @@ mod tests {
     fn test_discovery_config_default_production_mode() {
         temp_env::with_var("TOADSTOOL_ENV", Some("production"), || {
             let config = DiscoveryConfig::default();
-            assert!(!config.enable_localhost_fallback);
-            assert!(!config.allow_insecure);
+            assert!(config.cache_enabled);
         });
     }
 
@@ -337,19 +302,18 @@ mod tests {
     #[test]
     fn test_discovery_config_timeouts() {
         let config = DiscoveryConfig::production();
-        assert_eq!(config.timeout, Duration::from_secs(10));
-        assert_eq!(config.max_retries, 5);
-        assert_eq!(config.cache_ttl, Duration::from_secs(300));
+        assert_eq!(config.timeout_secs, PROD_DISCOVERY_TIMEOUT_SECS);
+        assert_eq!(config.retries, 5);
+        assert_eq!(config.cache_ttl_secs, PROD_CACHE_TTL_SECS);
 
         let config = DiscoveryConfig::development();
-        assert_eq!(config.timeout, Duration::from_secs(2));
-        assert_eq!(config.max_retries, 1);
-        assert_eq!(config.cache_ttl, Duration::from_secs(10));
+        assert_eq!(config.timeout_secs, DEV_DISCOVERY_TIMEOUT_SECS);
+        assert_eq!(config.retries, 1);
+        assert_eq!(config.cache_ttl_secs, DEV_CACHE_TTL_SECS);
 
-        let config = DiscoveryConfig::test();
-        assert_eq!(config.timeout, Duration::from_millis(100));
-        assert_eq!(config.max_retries, 0);
-        assert_eq!(config.cache_ttl, Duration::from_secs(1));
+        let config = DiscoveryConfig::test_config();
+        assert_eq!(config.retries, 0);
+        assert_eq!(config.cache_ttl_secs, TEST_CACHE_TTL_SECS);
     }
 
     #[test]
@@ -382,8 +346,7 @@ mod tests {
     fn test_discovery_config_default_staging_env() {
         temp_env::with_var("TOADSTOOL_ENV", Some("staging"), || {
             let config = DiscoveryConfig::default();
-            assert!(config.enable_localhost_fallback);
-            assert!(config.allow_insecure);
+            assert!(config.cache_enabled);
         });
     }
 
@@ -391,7 +354,7 @@ mod tests {
     fn test_discovery_config_default_empty_env() {
         temp_env::with_var_unset("TOADSTOOL_ENV", || {
             let config = DiscoveryConfig::default();
-            assert!(config.enable_localhost_fallback);
+            assert!(config.cache_enabled);
         });
     }
 
@@ -430,10 +393,7 @@ mod tests {
     fn test_discovery_config_clone() {
         let config = DiscoveryConfig::production();
         let cloned = config.clone();
-        assert_eq!(
-            config.enable_localhost_fallback,
-            cloned.enable_localhost_fallback
-        );
-        assert_eq!(config.timeout, cloned.timeout);
+        assert_eq!(config.retries, cloned.retries);
+        assert_eq!(config.timeout_secs, cloned.timeout_secs);
     }
 }

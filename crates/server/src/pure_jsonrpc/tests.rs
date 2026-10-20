@@ -8,7 +8,7 @@ use std::sync::atomic::AtomicBool;
 use std::borrow::Cow;
 
 use super::handler::JsonRpcHandler;
-use super::types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse, JsonWorkloadSubmission};
+use super::types::{JsonRpcError, JsonRpcErrorExt, JsonRpcResponse, JsonWorkloadSubmission, ZeroCopyJsonRpcRequest};
 use crate::rpc_types::{ResourceRequirements, WorkloadPriority};
 
 fn test_handler() -> JsonRpcHandler {
@@ -24,9 +24,9 @@ fn test_handler() -> JsonRpcHandler {
     )
 }
 
-fn mk_request(method: &str, params: Option<serde_json::Value>, id: i32) -> JsonRpcRequest<'static> {
+fn mk_request(method: &str, params: Option<serde_json::Value>, id: i32) -> ZeroCopyJsonRpcRequest<'static> {
     JsonRpcRequest {
-        jsonrpc: Cow::Borrowed("2.0"),
+        jsonrpc: "2.0".into(),
         method: Cow::Owned(method.to_string()),
         params,
         id: Some(serde_json::json!(id)),
@@ -41,7 +41,7 @@ fn test_parse_request() {
         "id": 1
     }"#;
 
-    let req: JsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
+    let req: ZeroCopyJsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
     assert_eq!(req.jsonrpc.as_ref(), "2.0");
     assert_eq!(req.method.as_ref(), "toadstool.health");
 }
@@ -117,7 +117,7 @@ async fn test_handle_method_dispatch_unknown() {
 async fn test_invalid_jsonrpc_version() {
     let handler = test_handler();
     let request = JsonRpcRequest {
-        jsonrpc: Cow::Owned("3.0".to_string()),
+        jsonrpc: "3.0".into(),
         method: Cow::Borrowed("toadstool.health"),
         params: None,
         id: Some(serde_json::json!(1)),
@@ -400,7 +400,7 @@ async fn test_health_error_count_incremented() {
 async fn test_request_id_null_when_missing() {
     let handler = test_handler();
     let request = JsonRpcRequest {
-        jsonrpc: Cow::Borrowed("2.0"),
+        jsonrpc: "2.0".into(),
         method: Cow::Borrowed("toadstool.health"),
         params: None,
         id: None,
@@ -463,7 +463,7 @@ async fn test_compute_cancel_success() {
 #[test]
 fn test_jsonrpc_response_serialization() {
     let success = JsonRpcResponse {
-        jsonrpc: std::borrow::Cow::Borrowed("2.0"),
+        jsonrpc: "2.0".into(),
         result: Some(serde_json::json!({"ok": true})),
         error: None,
         id: serde_json::json!(1),
@@ -474,7 +474,7 @@ fn test_jsonrpc_response_serialization() {
     assert!(!json.contains("\"error\""));
 
     let failure = JsonRpcResponse {
-        jsonrpc: std::borrow::Cow::Borrowed("2.0"),
+        jsonrpc: "2.0".into(),
         result: None,
         error: Some(JsonRpcError::method_not_found("foo")),
         id: serde_json::json!(2),
@@ -486,14 +486,14 @@ fn test_jsonrpc_response_serialization() {
 #[test]
 fn test_jsonrpc_request_with_params_array() {
     let json = r#"{"jsonrpc":"2.0","method":"foo","params":[1,2],"id":1}"#;
-    let req: JsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
+    let req: ZeroCopyJsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
     assert!(req.params.is_some());
 }
 
 #[test]
 fn test_jsonrpc_request_with_params_object() {
     let json = r#"{"jsonrpc":"2.0","method":"foo","params":{"x":1},"id":"req-1"}"#;
-    let req: JsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
+    let req: ZeroCopyJsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
     assert!(req.params.is_some());
     assert_eq!(req.method.as_ref(), "foo");
 }
@@ -501,7 +501,7 @@ fn test_jsonrpc_request_with_params_object() {
 #[test]
 fn test_jsonrpc_request_default_params() {
     let json = r#"{"jsonrpc":"2.0","method":"bar","id":null}"#;
-    let req: JsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
+    let req: ZeroCopyJsonRpcRequest<'_> = serde_json::from_str(json).expect("Parse failed");
     assert!(req.params.is_none());
 }
 

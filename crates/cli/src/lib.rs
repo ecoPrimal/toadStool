@@ -54,7 +54,7 @@ pub mod commands;
 
 pub use biome_model::{
     BiomeInfo, BiomeManifest, BiomeMetadata, BiomeNetworking, BiomeResources, BiomeSecurity,
-    BiomeStatus, BiomeStorage, DatasetConfig, HealthCheck, PortMapping, PrimalConfig,
+    BiomeStatus, BiomeStorage, DatasetConfig, HealthCheckConfig, PortMapping, PrimalConfig,
     ResourceUsage, ServiceConfig, ServiceInfo, ServicePort, ServiceResources, ServiceVolume,
     VolumeConfig, WorkloadSource,
 };

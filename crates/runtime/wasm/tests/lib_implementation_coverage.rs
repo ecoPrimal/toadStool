@@ -181,28 +181,28 @@ async fn test_engine_with_security_level_none() {
 #[tokio::test]
 async fn test_engine_with_security_level_basic() {
     let config = WasmRuntimeConfig {
-        security_level: SecurityLevel::Basic,
+        security_level: SecurityLevel::None,
         ..Default::default()
     };
 
     let engine = WasmRuntimeEngine::new(config);
     assert!(
         engine.is_ok(),
-        "Engine should work with SecurityLevel::Basic"
+        "Engine should work with SecurityLevel::None"
     );
 }
 
 #[tokio::test]
 async fn test_engine_with_security_level_strict() {
     let config = WasmRuntimeConfig {
-        security_level: SecurityLevel::Strict,
+        security_level: SecurityLevel::High,
         ..Default::default()
     };
 
     let engine = WasmRuntimeEngine::new(config);
     assert!(
         engine.is_ok(),
-        "Engine should work with SecurityLevel::Strict"
+        "Engine should work with SecurityLevel::High"
     );
 }
 

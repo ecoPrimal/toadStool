@@ -87,7 +87,7 @@ async fn test_concurrent_primal_context_creation() -> Result<()> {
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_security_levels() -> Result<()> {
     let levels = vec![
-        SecurityLevel::Basic,
+        SecurityLevel::None,
         SecurityLevel::Standard,
         SecurityLevel::High,
         SecurityLevel::Maximum,
@@ -111,7 +111,7 @@ async fn test_security_levels() -> Result<()> {
         // Verify the security level is set correctly
         assert!(matches!(
             context.security_level,
-            SecurityLevel::Basic
+            SecurityLevel::None
                 | SecurityLevel::Standard
                 | SecurityLevel::High
                 | SecurityLevel::Maximum
@@ -268,7 +268,7 @@ async fn test_sustained_concurrent_operations() -> Result<()> {
                     geo_location: None,
                 },
                 security_level: match i % 4 {
-                    0 => SecurityLevel::Basic,
+                    0 => SecurityLevel::None,
                     1 => SecurityLevel::Standard,
                     2 => SecurityLevel::High,
                     _ => SecurityLevel::Maximum,

@@ -11,7 +11,7 @@ fn test_encryption_context_builder() {
     let ctx = EncryptionContextBuilder::<NoopCryptoProvider>::new(Uuid::new_v4())
         .required(true)
         .encrypt_results(true)
-        .security_level(SecurityLevel::Enhanced)
+        .security_level(SecurityLevel::High)
         .build();
 
     assert!(ctx.is_required());
@@ -28,8 +28,8 @@ fn test_default_config() {
 
 #[test]
 fn test_security_level_ordering() {
-    assert!(SecurityLevel::Standard < SecurityLevel::Enhanced);
-    assert!(SecurityLevel::Enhanced < SecurityLevel::HardwareSecured);
+    assert!(SecurityLevel::Standard < SecurityLevel::High);
+    assert!(SecurityLevel::High < SecurityLevel::Maximum);
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn test_builder_all_options() {
     let ctx = EncryptionContextBuilder::<NoopCryptoProvider>::new(Uuid::new_v4())
         .required(true)
         .encrypt_results(true)
-        .security_level(SecurityLevel::HardwareSecured)
+        .security_level(SecurityLevel::Maximum)
         .key_id("full-config-key")
         .algorithms(vec!["aes-256-gcm".to_string()])
         .build();
@@ -69,7 +69,7 @@ fn test_encryption_context_new() {
         preferred_algorithms: vec!["test-alg".to_string()],
         key_id: Some("new-key".to_string()),
         encrypt_results: true,
-        min_security_level: SecurityLevel::Enhanced,
+        min_security_level: SecurityLevel::High,
     };
     let ctx = EncryptionContext::<super::provider::NoopCryptoProvider>::new(Uuid::new_v4(), config);
     assert!(ctx.is_required());
@@ -97,10 +97,10 @@ fn test_context_required_reflects_config() {
 #[test]
 fn test_security_level_equality() {
     assert_eq!(SecurityLevel::Standard, SecurityLevel::Standard);
-    assert_eq!(SecurityLevel::Enhanced, SecurityLevel::Enhanced);
+    assert_eq!(SecurityLevel::High, SecurityLevel::High);
     assert_eq!(
-        SecurityLevel::HardwareSecured,
-        SecurityLevel::HardwareSecured
+        SecurityLevel::Maximum,
+        SecurityLevel::Maximum
     );
 }
 
@@ -108,27 +108,27 @@ fn test_security_level_equality() {
 fn test_security_level_all_orderings() {
     use std::cmp::Ordering;
     assert_eq!(
-        SecurityLevel::Standard.cmp(&SecurityLevel::Enhanced),
+        SecurityLevel::Standard.cmp(&SecurityLevel::High),
         Ordering::Less
     );
     assert_eq!(
-        SecurityLevel::Standard.cmp(&SecurityLevel::HardwareSecured),
+        SecurityLevel::Standard.cmp(&SecurityLevel::Maximum),
         Ordering::Less
     );
     assert_eq!(
-        SecurityLevel::Enhanced.cmp(&SecurityLevel::HardwareSecured),
+        SecurityLevel::High.cmp(&SecurityLevel::Maximum),
         Ordering::Less
     );
     assert_eq!(
-        SecurityLevel::Enhanced.cmp(&SecurityLevel::Standard),
+        SecurityLevel::High.cmp(&SecurityLevel::Standard),
         Ordering::Greater
     );
     assert_eq!(
-        SecurityLevel::HardwareSecured.cmp(&SecurityLevel::Standard),
+        SecurityLevel::Maximum.cmp(&SecurityLevel::Standard),
         Ordering::Greater
     );
     assert_eq!(
-        SecurityLevel::HardwareSecured.cmp(&SecurityLevel::Enhanced),
+        SecurityLevel::Maximum.cmp(&SecurityLevel::High),
         Ordering::Greater
     );
 }
@@ -188,7 +188,7 @@ fn test_encrypted_output_serialization() {
             kdf_info: None,
             encrypted_at: 9_876_543_210,
         },
-        security_level: SecurityLevel::Enhanced,
+        security_level: SecurityLevel::High,
     };
     let json = serde_json::to_string(&output).unwrap();
     let deserialized: EncryptedOutput = serde_json::from_str(&json).unwrap();
@@ -205,7 +205,7 @@ fn test_ecosystem_config_serialization() {
         preferred_algorithms: vec!["aes-256-gcm".to_string()],
         key_id: Some("serial-key".to_string()),
         encrypt_results: true,
-        min_security_level: SecurityLevel::HardwareSecured,
+        min_security_level: SecurityLevel::Maximum,
     };
     let json = serde_json::to_string(&config).unwrap();
     let deserialized: EncryptionConfig = serde_json::from_str(&json).unwrap();
@@ -365,7 +365,7 @@ async fn test_decrypt_input_without_provider_returns_error() {
 #[tokio::test]
 async fn test_decrypt_input_security_level_below_minimum_returns_error() {
     let mut ctx = EncryptionContextBuilder::<NoopCryptoProvider>::new(Uuid::new_v4())
-        .security_level(SecurityLevel::HardwareSecured)
+        .security_level(SecurityLevel::Maximum)
         .build();
     let encrypted = EncryptedInput {
         payload: EncryptedPayload::new(vec![1, 2, 3]),

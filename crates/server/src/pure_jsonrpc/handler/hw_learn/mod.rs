@@ -14,7 +14,7 @@ mod status;
 mod telemetry;
 mod vfio;
 
-use crate::pure_jsonrpc::types::JsonRpcError;
+use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 use std::path::PathBuf;
 
 pub use helpers::check_thermal_for_bdf_pub;

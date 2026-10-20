@@ -8,7 +8,7 @@ pub(crate) async fn sovereign_ce_validate_ember(
     handler: &DispatchHandler,
     params: Option<&serde_json::Value>,
 ) -> Result<serde_json::Value, crate::pure_jsonrpc::types::JsonRpcError> {
-    use crate::pure_jsonrpc::types::JsonRpcError;
+    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
 
     let bdf = params
         .and_then(|p| p.get("bdf"))
