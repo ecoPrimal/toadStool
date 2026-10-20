@@ -7,24 +7,19 @@ use crate::input::InputEvent;
 use crate::window::{CreateWindowRequest, WindowInfo};
 use serde::{Deserialize, Serialize};
 
-/// JSON-RPC 2.0 request
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonRpcRequest {
-    /// Protocol version (always "2.0")
-    pub jsonrpc: String,
-    /// Method name
-    pub method: String,
-    /// Method parameters
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub params: Option<serde_json::Value>,
-    /// Request ID (for responses)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<serde_json::Value>,
+// ── Canonical types from cellmembrane-types ──────────────────────────
+pub use cellmembrane_types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
+
+// ── Extension traits for toadStool display convenience methods ───────
+
+/// Convenience constructors for `JsonRpcRequest` (auto-generates UUID id).
+pub trait JsonRpcRequestExt {
+    /// Create a new request with an auto-generated UUID id.
+    fn new_auto(method: impl Into<String>, params: Option<serde_json::Value>) -> Self;
 }
 
-impl JsonRpcRequest {
-    /// Create a new request
-    pub fn new(method: impl Into<String>, params: Option<serde_json::Value>) -> Self {
+impl JsonRpcRequestExt for JsonRpcRequest {
+    fn new_auto(method: impl Into<String>, params: Option<serde_json::Value>) -> Self {
         Self {
             jsonrpc: "2.0".to_string(),
             method: method.into(),
@@ -32,118 +27,49 @@ impl JsonRpcRequest {
             id: Some(serde_json::json!(uuid::Uuid::new_v4().to_string())),
         }
     }
+}
 
-    /// Create a notification (no response expected)
-    pub fn notification(method: impl Into<String>, params: Option<serde_json::Value>) -> Self {
-        Self {
-            jsonrpc: "2.0".to_string(),
-            method: method.into(),
-            params,
-            id: None,
-        }
+/// Convenience constructors for `JsonRpcError` used by display dispatch.
+pub trait JsonRpcErrorExt {
+    /// Parse error (`-32700`).
+    fn parse_error() -> Self;
+    /// Invalid request (`-32600`).
+    fn invalid_request() -> Self;
+    /// Method not found (`-32601`).
+    fn method_not_found(method: &str) -> Self;
+    /// Invalid params (`-32602`).
+    fn invalid_params(msg: &str) -> Self;
+    /// Internal error (`-32603`).
+    fn internal_error(msg: &str) -> Self;
+}
+
+impl JsonRpcErrorExt for JsonRpcError {
+    fn parse_error() -> Self {
+        Self { code: JsonRpcError::PARSE_ERROR, message: "Parse error".to_string(), data: None }
+    }
+    fn invalid_request() -> Self {
+        Self { code: JsonRpcError::INVALID_REQUEST, message: "Invalid request".to_string(), data: None }
+    }
+    fn method_not_found(method: &str) -> Self {
+        Self { code: JsonRpcError::METHOD_NOT_FOUND, message: format!("Method not found: {method}"), data: None }
+    }
+    fn invalid_params(msg: &str) -> Self {
+        Self { code: JsonRpcError::INVALID_PARAMS, message: format!("Invalid params: {msg}"), data: None }
+    }
+    fn internal_error(msg: &str) -> Self {
+        Self { code: JsonRpcError::INTERNAL_ERROR, message: format!("Internal error: {msg}"), data: None }
     }
 }
 
-/// JSON-RPC 2.0 response
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonRpcResponse {
-    /// Protocol version
-    pub jsonrpc: String,
-    /// Result (on success)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<serde_json::Value>,
-    /// Error (on failure)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<JsonRpcError>,
-    /// Request ID
-    pub id: serde_json::Value,
+/// Extension for creating error responses from pre-built `JsonRpcError` objects.
+pub trait JsonRpcResponseExt {
+    /// Create an error response from a pre-built error object.
+    fn from_error(id: serde_json::Value, error: JsonRpcError) -> Self;
 }
 
-impl JsonRpcResponse {
-    /// Create a success response
-    #[must_use]
-    pub fn success(id: serde_json::Value, result: serde_json::Value) -> Self {
-        Self {
-            jsonrpc: "2.0".to_string(),
-            result: Some(result),
-            error: None,
-            id,
-        }
-    }
-
-    /// Create an error response
-    #[must_use]
-    pub fn error(id: serde_json::Value, error: JsonRpcError) -> Self {
-        Self {
-            jsonrpc: "2.0".to_string(),
-            result: None,
-            error: Some(error),
-            id,
-        }
-    }
-}
-
-/// JSON-RPC error
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonRpcError {
-    /// Error code
-    pub code: i32,
-    /// Error message
-    pub message: String,
-    /// Additional error data
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<serde_json::Value>,
-}
-
-impl JsonRpcError {
-    /// Parse error (-32700)
-    #[must_use]
-    pub fn parse_error() -> Self {
-        Self {
-            code: -32700,
-            message: "Parse error".to_string(),
-            data: None,
-        }
-    }
-
-    /// Invalid request (-32600)
-    #[must_use]
-    pub fn invalid_request() -> Self {
-        Self {
-            code: -32600,
-            message: "Invalid request".to_string(),
-            data: None,
-        }
-    }
-
-    /// Method not found (-32601)
-    #[must_use]
-    pub fn method_not_found(method: &str) -> Self {
-        Self {
-            code: -32601,
-            message: format!("Method not found: {method}"),
-            data: None,
-        }
-    }
-
-    /// Invalid params (-32602)
-    #[must_use]
-    pub fn invalid_params(msg: &str) -> Self {
-        Self {
-            code: -32602,
-            message: format!("Invalid params: {msg}"),
-            data: None,
-        }
-    }
-
-    /// Internal error (-32603)
-    #[must_use]
-    pub fn internal_error(msg: &str) -> Self {
-        Self {
-            code: -32603,
-            message: format!("Internal error: {msg}"),
-            data: None,
-        }
+impl JsonRpcResponseExt for JsonRpcResponse {
+    fn from_error(id: serde_json::Value, error: JsonRpcError) -> Self {
+        Self { jsonrpc: "2.0".into(), result: None, error: Some(error), id }
     }
 }
 
@@ -287,7 +213,7 @@ mod tests {
 
     #[test]
     fn test_jsonrpc_request_serialization() {
-        let req = JsonRpcRequest::new("display.create_window", None);
+        let req = JsonRpcRequest::new_auto("display.create_window", None);
         let json = serde_json::to_string(&req).unwrap();
         assert!(json.contains("\"jsonrpc\":\"2.0\""));
         assert!(json.contains("\"method\":\"display.create_window\""));

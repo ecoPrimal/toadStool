@@ -7,7 +7,7 @@ use base64::Engine;
 use serde::Deserialize;
 
 use super::platform;
-use super::types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
+use super::types::{JsonRpcError, JsonRpcErrorExt, JsonRpcRequest, JsonRpcResponse, JsonRpcResponseExt};
 use crate::input::InputManager;
 use crate::window::{CreateWindowRequest, Size, WindowId, WindowManager};
 use crate::{DisplayError, Result};
@@ -27,7 +27,7 @@ pub async fn handle_request(
     let request: JsonRpcRequest = match serde_json::from_slice(request_str.as_bytes()) {
         Ok(req) => req,
         Err(_) => {
-            return JsonRpcResponse::error(serde_json::json!(null), JsonRpcError::parse_error());
+            return JsonRpcResponse::from_error(serde_json::json!(null), JsonRpcError::parse_error());
         }
     };
 
@@ -37,7 +37,7 @@ pub async fn handle_request(
 
     match result {
         Ok(value) => JsonRpcResponse::success(id, value),
-        Err(e) => JsonRpcResponse::error(id, JsonRpcError::internal_error(&e.to_string())),
+        Err(e) => JsonRpcResponse::from_error(id, JsonRpcError::internal_error(&e.to_string())),
     }
 }
 

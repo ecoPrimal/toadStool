@@ -6,7 +6,7 @@ use base64::Engine;
 use super::DisplayClient;
 use crate::DisplayError;
 use crate::input::InputEvent;
-use crate::ipc::types::DisplayCapabilitiesInfo;
+use crate::ipc::types::{DisplayCapabilitiesInfo, JsonRpcRequestExt};
 use crate::window::{CreateWindowRequest, WindowId, WindowInfo};
 
 impl DisplayClient {
@@ -18,7 +18,7 @@ impl DisplayClient {
     pub async fn create_window(&mut self, request: CreateWindowRequest) -> crate::Result<WindowId> {
         let params = serde_json::to_value(request)
             .map_err(|e| DisplayError::IpcError(format!("Failed to serialize request: {e}")))?;
-        let req = crate::ipc::types::JsonRpcRequest::new("display.create_window", Some(params));
+        let req = crate::ipc::types::JsonRpcRequest::new_auto("display.create_window", Some(params));
 
         let response = self.send_request(req).await?;
 
@@ -43,7 +43,7 @@ impl DisplayClient {
     ///
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn destroy_window(&mut self, window_id: WindowId) -> crate::Result<()> {
-        let req = crate::ipc::types::JsonRpcRequest::new(
+        let req = crate::ipc::types::JsonRpcRequest::new_auto(
             "display.destroy_window",
             Some(serde_json::json!({"window_id": window_id.as_string()})),
         );
@@ -70,7 +70,7 @@ impl DisplayClient {
         width: u32,
         height: u32,
     ) -> crate::Result<()> {
-        let req = crate::ipc::types::JsonRpcRequest::new(
+        let req = crate::ipc::types::JsonRpcRequest::new_auto(
             "display.resize_window",
             Some(serde_json::json!({
                 "window_id": window_id.as_string(),
@@ -96,7 +96,7 @@ impl DisplayClient {
     ///
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn get_window_info(&mut self, window_id: WindowId) -> crate::Result<WindowInfo> {
-        let req = crate::ipc::types::JsonRpcRequest::new(
+        let req = crate::ipc::types::JsonRpcRequest::new_auto(
             "display.get_window_info",
             Some(serde_json::json!({"window_id": window_id.as_string()})),
         );
@@ -122,7 +122,7 @@ impl DisplayClient {
     ///
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn get_capabilities(&mut self) -> crate::Result<DisplayCapabilitiesInfo> {
-        let req = crate::ipc::types::JsonRpcRequest::new("display.get_capabilities", None);
+        let req = crate::ipc::types::JsonRpcRequest::new_auto("display.get_capabilities", None);
 
         let response = self.send_request(req).await?;
 
@@ -149,7 +149,7 @@ impl DisplayClient {
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn present(&mut self, window_id: WindowId, pixels: &[u8]) -> crate::Result<()> {
         let data_b64 = base64::engine::general_purpose::STANDARD.encode(pixels);
-        let req = crate::ipc::types::JsonRpcRequest::new(
+        let req = crate::ipc::types::JsonRpcRequest::new_auto(
             "display.present",
             Some(serde_json::json!({
                 "window_id": window_id.as_string(),
@@ -179,7 +179,7 @@ impl DisplayClient {
     ///
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn present_shm(&mut self, window_id: WindowId, shm_path: &str) -> crate::Result<()> {
-        let req = crate::ipc::types::JsonRpcRequest::new(
+        let req = crate::ipc::types::JsonRpcRequest::new_auto(
             "display.present",
             Some(serde_json::json!({
                 "window_id": window_id.as_string(),
@@ -208,7 +208,7 @@ impl DisplayClient {
     ///
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn subscribe_input(&mut self, window_id: WindowId) -> crate::Result<()> {
-        let req = crate::ipc::types::JsonRpcRequest::new(
+        let req = crate::ipc::types::JsonRpcRequest::new_auto(
             "display.subscribe_input",
             Some(serde_json::json!({"window_id": window_id.as_string()})),
         );
@@ -234,7 +234,7 @@ impl DisplayClient {
     ///
     /// Returns an error if the IPC request fails or the server returns an error.
     pub async fn poll_events(&mut self) -> crate::Result<Vec<InputEvent>> {
-        let req = crate::ipc::types::JsonRpcRequest::new("display.poll_events", None);
+        let req = crate::ipc::types::JsonRpcRequest::new_auto("display.poll_events", None);
 
         let response = self.send_request(req).await?;
 

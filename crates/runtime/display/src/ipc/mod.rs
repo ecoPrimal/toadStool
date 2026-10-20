@@ -76,6 +76,6 @@ pub use health::{
 };
 pub use server::{DisplayServer, IpcTransport};
 pub use types::{
-    DisplayCapabilitiesInfo, DisplayMethod, DisplayResult, JsonRpcError, JsonRpcRequest,
-    JsonRpcResponse,
+    DisplayCapabilitiesInfo, DisplayMethod, DisplayResult, JsonRpcError, JsonRpcErrorExt,
+    JsonRpcRequest, JsonRpcRequestExt, JsonRpcResponse, JsonRpcResponseExt,
 };

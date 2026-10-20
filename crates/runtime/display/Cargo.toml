@@ -10,6 +10,9 @@ keywords = ["display", "input", "drm", "evdev", "pure-rust"]
 categories = ["gui", "graphics", "hardware-support"]
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types = { workspace = true }
+
 # Serial transport (wraps edge crate's serialport capability)
 # default-features = false: avoids libudev-sys (C dep) for ecoBin pure-Rust compliance.
 # Port enumeration still works; may return less detail or stale entries.

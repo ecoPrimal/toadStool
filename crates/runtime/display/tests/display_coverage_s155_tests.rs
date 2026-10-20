@@ -13,8 +13,8 @@ use toadstool_display::drm::{Device, DeviceCapabilities};
 use toadstool_display::input::{InputEvent, KeyCode, Modifiers, MouseButton, TouchPhase};
 use toadstool_display::ipc::IpcTransport;
 use toadstool_display::ipc::{
-    DisplayCapabilitiesInfo, DisplayMethod, DisplayResult, JsonRpcError, JsonRpcRequest,
-    JsonRpcResponse,
+    DisplayCapabilitiesInfo, DisplayMethod, DisplayResult, JsonRpcError, JsonRpcErrorExt,
+    JsonRpcRequest, JsonRpcRequestExt, JsonRpcResponse, JsonRpcResponseExt,
 };
 use toadstool_display::window::WindowId;
 use toadstool_display::{DisplayError, DisplayServer, WindowManager};
@@ -249,7 +249,7 @@ fn display_error_window_not_found() {
 
 #[test]
 fn ipc_jsonrpc_request_new() {
-    let req = JsonRpcRequest::new("display.create_window", None);
+    let req = JsonRpcRequest::new_auto("display.create_window", None);
     assert_eq!(req.jsonrpc, "2.0");
     assert_eq!(req.method, "display.create_window");
     assert!(req.id.is_some());
@@ -274,7 +274,7 @@ fn ipc_jsonrpc_response_success() {
 #[test]
 fn ipc_jsonrpc_response_error() {
     let err = JsonRpcError::internal_error("oops");
-    let resp = JsonRpcResponse::error(serde_json::json!(1), err);
+    let resp = JsonRpcResponse::from_error(serde_json::json!(1), err);
     assert!(resp.result.is_none());
     assert!(resp.error.is_some());
 }

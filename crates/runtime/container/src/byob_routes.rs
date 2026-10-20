@@ -16,111 +16,47 @@ use toadstool::{
 };
 use toadstool_common::constants::jsonrpc::error_codes;
 
-/// JSON-RPC 2.0 request (ecosystem-standard newline-delimited protocol).
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonRpcRequest {
-    /// Protocol version (always "2.0").
-    pub jsonrpc: String,
-    /// Method name (e.g. `byob.deploy`).
-    pub method: String,
-    /// Method parameters.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub params: Option<serde_json::Value>,
-    /// Request ID for correlation.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<serde_json::Value>,
-}
+// ── Canonical types from cellmembrane-types ──────────────────────────
+pub use cellmembrane_types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
 
-/// JSON-RPC 2.0 response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonRpcResponse {
-    /// Protocol version.
-    pub jsonrpc: String,
-    /// Result on success.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<serde_json::Value>,
-    /// Error on failure.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<JsonRpcError>,
-    /// Correlated request ID.
-    pub id: serde_json::Value,
-}
+// ── Extension traits for toadStool container convenience methods ─────
 
-impl JsonRpcResponse {
-    /// Create a success response.
-    #[must_use]
-    pub fn success(id: serde_json::Value, result: serde_json::Value) -> Self {
-        Self {
-            jsonrpc: "2.0".to_string(),
-            result: Some(result),
-            error: None,
-            id,
-        }
-    }
-
-    /// Create an error response.
-    #[must_use]
-    pub fn error(id: serde_json::Value, error: JsonRpcError) -> Self {
-        Self {
-            jsonrpc: "2.0".to_string(),
-            result: None,
-            error: Some(error),
-            id,
-        }
-    }
-}
-
-/// JSON-RPC 2.0 error object.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonRpcError {
-    /// Numeric error code per JSON-RPC 2.0 spec.
-    pub code: i32,
-    /// Human-readable error message.
-    pub message: String,
-    /// Optional structured error data.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<serde_json::Value>,
-}
-
-impl JsonRpcError {
+/// Convenience constructors for `JsonRpcError` used by BYOB dispatch.
+pub trait JsonRpcErrorExt {
     /// Parse error (`-32700`).
-    #[must_use]
-    pub fn parse_error() -> Self {
-        Self {
-            code: error_codes::PARSE_ERROR,
-            message: "Parse error".to_string(),
-            data: None,
-        }
-    }
-
+    fn parse_error() -> Self;
     /// Method not found (`-32601`).
-    #[must_use]
-    pub fn method_not_found(method: &str) -> Self {
-        Self {
-            code: error_codes::METHOD_NOT_FOUND,
-            message: format!("Method not found: {method}"),
-            data: None,
-        }
-    }
-
+    fn method_not_found(method: &str) -> Self;
     /// Invalid params (`-32602`).
-    #[must_use]
-    pub fn invalid_params(msg: &str) -> Self {
-        Self {
-            code: error_codes::INVALID_PARAMS,
-            message: format!("Invalid params: {msg}"),
-            data: None,
-        }
-    }
-
+    fn invalid_params(msg: &str) -> Self;
     /// Internal error (`-32603`).
-    #[must_use]
-    pub fn internal_error(msg: &str) -> Self {
-        Self {
-            code: error_codes::INTERNAL_ERROR,
-            message: format!("Internal error: {msg}"),
-            data: None,
-        }
+    fn internal_error(msg: &str) -> Self;
+}
+
+impl JsonRpcErrorExt for JsonRpcError {
+    fn parse_error() -> Self {
+        Self { code: error_codes::PARSE_ERROR, message: "Parse error".to_string(), data: None }
+    }
+    fn method_not_found(method: &str) -> Self {
+        Self { code: error_codes::METHOD_NOT_FOUND, message: format!("Method not found: {method}"), data: None }
+    }
+    fn invalid_params(msg: &str) -> Self {
+        Self { code: error_codes::INVALID_PARAMS, message: format!("Invalid params: {msg}"), data: None }
+    }
+    fn internal_error(msg: &str) -> Self {
+        Self { code: error_codes::INTERNAL_ERROR, message: format!("Internal error: {msg}"), data: None }
+    }
+}
+
+/// Extension for creating error responses from pre-built `JsonRpcError` objects.
+pub trait JsonRpcResponseExt {
+    /// Create an error response from a pre-built error object.
+    fn from_error(id: serde_json::Value, error: JsonRpcError) -> Self;
+}
+
+impl JsonRpcResponseExt for JsonRpcResponse {
+    fn from_error(id: serde_json::Value, error: JsonRpcError) -> Self {
+        Self { jsonrpc: "2.0".into(), result: None, error: Some(error), id }
     }
 }
 
@@ -154,7 +90,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
         let request: JsonRpcRequest = match serde_json::from_str(request_str.trim()) {
             Ok(req) => req,
             Err(_) => {
-                return JsonRpcResponse::error(
+                return JsonRpcResponse::from_error(
                     serde_json::json!(null),
                     JsonRpcError::parse_error(),
                 );
@@ -171,7 +107,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
             "byob.get_resource_usage" => self.get_resource_usage(id, request.params).await,
             "byob.health" => self.health_check(id),
             "byob.info" => self.info(id),
-            _ => JsonRpcResponse::error(id, JsonRpcError::method_not_found(&request.method)),
+            _ => JsonRpcResponse::from_error(id, JsonRpcError::method_not_found(&request.method)),
         }
     }
 
@@ -186,7 +122,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
         {
             Some(req) => req,
             None => {
-                return JsonRpcResponse::error(
+                return JsonRpcResponse::from_error(
                     id,
                     JsonRpcError::invalid_params("missing or invalid deployment request"),
                 );
@@ -205,7 +141,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
             }
             Err(e) => {
                 error!("BYOB deployment failed: {:?}", e);
-                JsonRpcResponse::error(id, toadstool_error_to_jsonrpc(&e))
+                JsonRpcResponse::from_error(id, toadstool_error_to_jsonrpc(&e))
             }
         }
     }
@@ -217,7 +153,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
             }
             Err(e) => {
                 error!("Failed to list deployments: {:?}", e);
-                JsonRpcResponse::error(id, toadstool_error_to_jsonrpc(&e))
+                JsonRpcResponse::from_error(id, toadstool_error_to_jsonrpc(&e))
             }
         }
     }
@@ -230,7 +166,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
         let deployment_id = match extract_deployment_id(&params) {
             Some(did) => did,
             None => {
-                return JsonRpcResponse::error(
+                return JsonRpcResponse::from_error(
                     id,
                     JsonRpcError::invalid_params("missing or invalid deployment_id"),
                 );
@@ -243,7 +179,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
             }
             Err(e) => {
                 error!("Failed to get deployment status: {:?}", e);
-                JsonRpcResponse::error(id, toadstool_error_to_jsonrpc(&e))
+                JsonRpcResponse::from_error(id, toadstool_error_to_jsonrpc(&e))
             }
         }
     }
@@ -256,7 +192,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
         let deployment_id = match extract_deployment_id(&params) {
             Some(did) => did,
             None => {
-                return JsonRpcResponse::error(
+                return JsonRpcResponse::from_error(
                     id,
                     JsonRpcError::invalid_params("missing or invalid deployment_id"),
                 );
@@ -273,7 +209,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
             }
             Err(e) => {
                 error!("Failed to stop deployment: {:?}", e);
-                JsonRpcResponse::error(id, toadstool_error_to_jsonrpc(&e))
+                JsonRpcResponse::from_error(id, toadstool_error_to_jsonrpc(&e))
             }
         }
     }
@@ -286,7 +222,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
         let deployment_id = match extract_deployment_id(&params) {
             Some(did) => did,
             None => {
-                return JsonRpcResponse::error(
+                return JsonRpcResponse::from_error(
                     id,
                     JsonRpcError::invalid_params("missing or invalid deployment_id"),
                 );
@@ -299,7 +235,7 @@ impl<E: ByobExecutor + Send + Sync + 'static> ByobApi<E> {
             }
             Err(e) => {
                 error!("Failed to get resource usage: {:?}", e);
-                JsonRpcResponse::error(id, toadstool_error_to_jsonrpc(&e))
+                JsonRpcResponse::from_error(id, toadstool_error_to_jsonrpc(&e))
             }
         }
     }

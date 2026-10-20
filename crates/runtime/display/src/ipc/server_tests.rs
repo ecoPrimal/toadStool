@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 use super::*;
-use crate::ipc::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
+use crate::ipc::{JsonRpcError, JsonRpcErrorExt, JsonRpcRequest, JsonRpcResponse, JsonRpcResponseExt};
 use std::net::{Ipv4Addr, SocketAddr};
 
 #[tokio::test]
@@ -123,7 +123,7 @@ fn test_jsonrpc_request_parse_valid() {
 #[test]
 fn test_jsonrpc_response_error_roundtrip() {
     let err = JsonRpcError::internal_error("test");
-    let resp = JsonRpcResponse::error(serde_json::json!(1), err);
+    let resp = JsonRpcResponse::from_error(serde_json::json!(1), err);
     let json = serde_json::to_string(&resp).unwrap();
     let parsed: JsonRpcResponse = serde_json::from_str(&json).unwrap();
     assert!(parsed.error.is_some());

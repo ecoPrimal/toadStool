@@ -9,6 +9,9 @@ keywords = ["container", "docker", "runtime", "orchestration"]
 categories = ["development-tools"]
 
 [dependencies]
+# Canonical ecosystem types (cellMembrane)
+cellmembrane-types = { workspace = true }
+
 # Core ToadStool dependencies
 toadstool = { path = "../../core/toadstool" }
 toadstool-common = { path = "../../core/common" }

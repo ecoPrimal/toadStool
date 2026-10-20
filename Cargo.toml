@@ -74,6 +74,11 @@ categories = ["development-tools", "web-programming", "api-bindings"]
 
 [workspace.dependencies]
 # ============================================================================
+# CANONICAL ECOSYSTEM TYPES — shared across all organisms (cellMembrane)
+# ============================================================================
+cellmembrane-types = { path = "../../gardens/cellMembrane/crates/cellmembrane-types" }
+
+# ============================================================================
 # GPU COMPUTE FRAMEWORKS - Universal versioning to prevent linker conflicts
 # ============================================================================
 # CRITICAL: wgpu must be the same version across all crates to prevent

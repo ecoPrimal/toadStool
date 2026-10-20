@@ -5,12 +5,12 @@
 
 use std::path::PathBuf;
 use toadstool_display::ipc::IpcEndpoint;
-use toadstool_display::ipc::{DisplayCapabilitiesInfo, JsonRpcRequest, JsonRpcResponse};
+use toadstool_display::ipc::{DisplayCapabilitiesInfo, JsonRpcRequest, JsonRpcRequestExt, JsonRpcResponse};
 use toadstool_display::window::WindowId;
 
 #[test]
 fn test_jsonrpc_request_new_has_id() {
-    let req = JsonRpcRequest::new("display.get_capabilities", None);
+    let req = JsonRpcRequest::new_auto("display.get_capabilities", None);
     assert_eq!(req.jsonrpc, "2.0");
     assert_eq!(req.method, "display.get_capabilities");
     assert!(req.id.is_some());
@@ -27,7 +27,7 @@ fn test_jsonrpc_request_notification_no_id() {
 #[test]
 fn test_jsonrpc_request_with_params_serialization() {
     let params = serde_json::json!({"window_id": "test-123", "width": 800, "height": 600});
-    let req = JsonRpcRequest::new("display.resize_window", Some(params));
+    let req = JsonRpcRequest::new_auto("display.resize_window", Some(params));
     let json = serde_json::to_string(&req).unwrap();
     assert!(json.contains("display.resize_window"));
     assert!(json.contains("800"));
@@ -84,7 +84,7 @@ fn test_ipc_endpoint_tcp_addr() {
 fn test_window_id_serialization_for_request() {
     let window_id = WindowId::new();
     let params = serde_json::json!({"window_id": window_id.as_string()});
-    let req = JsonRpcRequest::new("display.destroy_window", Some(params));
+    let req = JsonRpcRequest::new_auto("display.destroy_window", Some(params));
     assert_eq!(
         req.params.as_ref().unwrap()["window_id"],
         window_id.as_string()
@@ -126,7 +126,7 @@ fn test_jsonrpc_response_error_parse() {
 #[test]
 fn test_jsonrpc_request_display_create_window() {
     let params = serde_json::json!({});
-    let req = JsonRpcRequest::new("display.create_window", Some(params));
+    let req = JsonRpcRequest::new_auto("display.create_window", Some(params));
     assert_eq!(req.method, "display.create_window");
 }
 
@@ -134,13 +134,13 @@ fn test_jsonrpc_request_display_create_window() {
 fn test_jsonrpc_request_display_get_window_info() {
     let window_id = WindowId::new();
     let params = serde_json::json!({"window_id": window_id.as_string()});
-    let req = JsonRpcRequest::new("display.get_window_info", Some(params));
+    let req = JsonRpcRequest::new_auto("display.get_window_info", Some(params));
     assert_eq!(req.method, "display.get_window_info");
 }
 
 #[test]
 fn test_jsonrpc_request_display_get_capabilities() {
-    let req = JsonRpcRequest::new("display.get_capabilities", None);
+    let req = JsonRpcRequest::new_auto("display.get_capabilities", None);
     assert_eq!(req.method, "display.get_capabilities");
 }
 

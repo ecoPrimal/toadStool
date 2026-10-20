@@ -2,13 +2,13 @@
 //! Tests for the display IPC client.
 
 use super::{DisplayClient, IpcEndpoint, default_display_ipc_tcp_addr};
-use crate::ipc::types::{JsonRpcRequest, JsonRpcResponse};
+use crate::ipc::types::{JsonRpcRequest, JsonRpcRequestExt, JsonRpcResponse};
 use crate::window::WindowId;
 use std::path::PathBuf;
 
 #[test]
 fn test_jsonrpc_request_creation() {
-    let req = JsonRpcRequest::new("display.create_window", None);
+    let req = JsonRpcRequest::new_auto("display.create_window", None);
     assert_eq!(req.jsonrpc, "2.0");
     assert_eq!(req.method, "display.create_window");
     assert!(req.id.is_some());
@@ -34,7 +34,7 @@ fn test_ipc_endpoint_tcp_variant() {
 #[test]
 fn test_jsonrpc_request_with_params() {
     let params = serde_json::json!({"width": 800, "height": 600});
-    let req = JsonRpcRequest::new("display.create_window", Some(params));
+    let req = JsonRpcRequest::new_auto("display.create_window", Some(params));
     assert_eq!(req.method, "display.create_window");
     assert!(req.params.is_some());
 }
@@ -43,7 +43,7 @@ fn test_jsonrpc_request_with_params() {
 fn test_jsonrpc_request_destroy_window_params() {
     let window_id = WindowId::new();
     let params = serde_json::json!({"window_id": window_id.as_string()});
-    let req = JsonRpcRequest::new("display.destroy_window", Some(params));
+    let req = JsonRpcRequest::new_auto("display.destroy_window", Some(params));
     assert_eq!(req.method, "display.destroy_window");
     assert_eq!(
         req.params.as_ref().unwrap()["window_id"],
@@ -59,7 +59,7 @@ fn test_jsonrpc_request_resize_window_params() {
         "width": 1024,
         "height": 768
     });
-    let req = JsonRpcRequest::new("display.resize_window", Some(params));
+    let req = JsonRpcRequest::new_auto("display.resize_window", Some(params));
     assert_eq!(req.method, "display.resize_window");
     let p = req.params.unwrap();
     assert_eq!(p["width"], 1024);
@@ -68,7 +68,7 @@ fn test_jsonrpc_request_resize_window_params() {
 
 #[test]
 fn test_jsonrpc_request_serialization() {
-    let req = JsonRpcRequest::new("display.get_capabilities", None);
+    let req = JsonRpcRequest::new_auto("display.get_capabilities", None);
     let json = serde_json::to_string(&req).unwrap();
     assert!(json.contains("display.get_capabilities"));
     assert!(json.contains("2.0"));
