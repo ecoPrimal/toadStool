@@ -172,8 +172,9 @@ async fn test_mock_executor_health_check() {
     assert!(health.is_ok());
     let h = health.unwrap();
     assert!(h.healthy);
-    assert_eq!(h.version.as_ref(), "test-v1");
-    assert!(h.resource_utilization >= 0.0 && h.resource_utilization <= 1.0);
+    assert_eq!(h.details["version"].as_str().unwrap(), "test-v1");
+    let ru = h.details["resource_utilization"].as_f64().unwrap();
+    assert!(ru >= 0.0 && ru <= 1.0);
 }
 
 #[tokio::test]
@@ -359,8 +360,8 @@ async fn test_health_check_with_active_workloads() {
     assert!(health.is_ok());
     let h = health.expect("health check succeeded");
     assert!(h.healthy);
-    assert_eq!(h.active_workloads, 1);
-    assert_eq!(h.queued_workloads, 1);
+    assert_eq!(h.details["active_workloads"].as_u64().unwrap(), 1);
+    assert_eq!(h.details["queued_workloads"].as_u64().unwrap(), 1);
 }
 
 #[tokio::test]
@@ -377,7 +378,7 @@ async fn test_health_check_includes_error_count() {
     let health = server.clone().health_check(tarpc::context::current()).await;
     assert!(health.is_ok());
     let h = health.unwrap();
-    assert!(h.error_count >= 5);
+    assert!(h.details["error_count"].as_u64().unwrap() >= 5);
 }
 
 #[tokio::test]
@@ -430,27 +431,27 @@ async fn test_tarpc_server_version_reflected_in_health() {
     let server = ToadStoolTarpcServer::new("2.3.4", executor, None);
     let health = server.health_check(tarpc::context::current()).await;
     assert!(health.is_ok());
-    assert_eq!(health.unwrap().version.as_ref(), "2.3.4");
+    assert_eq!(health.unwrap().details["version"].as_str().unwrap(), "2.3.4");
 }
 
 #[tokio::test]
 async fn test_health_status_serialization() {
     use crate::rpc_types::HealthStatus;
-    let status = HealthStatus {
-        healthy: true,
-        version: Arc::from("1.2.3"),
-        uptime_secs: 3600,
-        resource_utilization: 0.5,
-        active_workloads: 2,
-        queued_workloads: 1,
-        error_count: 0,
-    };
+    let status = HealthStatus::ok()
+        .with_uptime(3600)
+        .with_detail("version", serde_json::Value::String("1.2.3".into()))
+        .with_detail("resource_utilization", serde_json::json!(0.5))
+        .with_detail("active_workloads", serde_json::json!(2))
+        .with_detail("queued_workloads", serde_json::json!(1))
+        .with_detail("error_count", serde_json::json!(0));
     let json = serde_json::to_string(&status).expect("serialize");
     let restored: HealthStatus = serde_json::from_str(&json).expect("deserialize");
     assert_eq!(restored.healthy, status.healthy);
-    assert_eq!(restored.version, status.version);
+    assert_eq!(restored.details["version"], status.details["version"]);
     assert_eq!(restored.uptime_secs, status.uptime_secs);
-    assert!((restored.resource_utilization - status.resource_utilization).abs() < 0.001);
+    let restored_ru = restored.details["resource_utilization"].as_f64().unwrap();
+    let status_ru = status.details["resource_utilization"].as_f64().unwrap();
+    assert!((restored_ru - status_ru).abs() < 0.001);
 }
 
 #[tokio::test]

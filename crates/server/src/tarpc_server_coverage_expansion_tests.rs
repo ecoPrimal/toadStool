@@ -170,19 +170,17 @@ async fn workload_status_serde_all_variants() {
 
 #[tokio::test]
 async fn health_status_clone_debug_serde() {
-    let h = HealthStatus {
-        healthy: false,
-        version: Arc::from("9.9.9"),
-        uptime_secs: 42,
-        resource_utilization: 0.88,
-        active_workloads: 3,
-        queued_workloads: 1,
-        error_count: 7,
-    };
+    let mut h = HealthStatus::ok().with_uptime(42)
+        .with_detail("version", serde_json::Value::String("9.9.9".into()))
+        .with_detail("resource_utilization", serde_json::json!(0.88))
+        .with_detail("active_workloads", serde_json::json!(3))
+        .with_detail("queued_workloads", serde_json::json!(1))
+        .with_detail("error_count", serde_json::json!(7));
+    h.healthy = false;
     let restored = round_trip_json(&h);
-    assert_eq!(restored.error_count, h.error_count);
+    assert_eq!(restored.details["error_count"], h.details["error_count"]);
     let c = h.clone();
-    assert_eq!(c.version, h.version);
+    assert_eq!(c.details["version"], h.details["version"]);
     let dbg = format!("{h:?}");
     assert!(dbg.contains("9.9.9"));
 }
@@ -309,6 +307,6 @@ async fn health_check_counts_running_without_queued() {
         .health_check(Context::current())
         .await
         .expect("health");
-    assert_eq!(h.active_workloads, 1);
-    assert_eq!(h.queued_workloads, 0);
+    assert_eq!(h.details["active_workloads"].as_u64().unwrap(), 1);
+    assert_eq!(h.details["queued_workloads"].as_u64().unwrap(), 0);
 }

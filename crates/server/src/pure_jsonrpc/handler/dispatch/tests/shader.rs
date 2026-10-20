@@ -2,7 +2,7 @@
 //! `shader.dispatch` tests — binary formats, compile_result shapes, readback, job tracking.
 
 use super::{DispatchHandler, JsonRpcError, test_handler};
-use crate::pure_jsonrpc::types::JsonRpcErrorExt;
+
 use crate::pure_jsonrpc::handler::method_gate::{CallerContext, ResourceEnvelope};
 
 #[tokio::test]

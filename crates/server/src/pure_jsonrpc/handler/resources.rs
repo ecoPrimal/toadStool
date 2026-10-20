@@ -87,7 +87,7 @@ impl ResourceHandler {
 #[cfg(test)]
 mod tests {
     use crate::graph_types::{ExecutionGraph, GraphNode};
-    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
+    use crate::pure_jsonrpc::types::JsonRpcError;
 
     use super::ResourceHandler;
 

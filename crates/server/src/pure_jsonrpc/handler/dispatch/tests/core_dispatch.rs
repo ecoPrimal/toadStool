@@ -2,7 +2,7 @@
 //! Core dispatch handler tests — capabilities, submit, status, result, forward, crypto paths.
 
 use super::{DispatchHandler, JsonRpcError, submit_params, test_handler};
-use crate::pure_jsonrpc::types::JsonRpcErrorExt;
+
 
 #[tokio::test]
 async fn dispatch_capabilities_returns_expected_structure() {

@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use super::JsonRpcHandler;
-use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt, ZeroCopyJsonRpcRequest};
+use crate::pure_jsonrpc::types::{JsonRpcError, ZeroCopyJsonRpcRequest};
 
 fn test_handler() -> JsonRpcHandler {
     let executor = Arc::new(crate::tarpc_server::WorkloadExecutorDispatch::Standalone(
@@ -21,7 +21,7 @@ fn test_handler() -> JsonRpcHandler {
 }
 
 fn mk_request(method: &str, params: Option<serde_json::Value>, id: i32) -> ZeroCopyJsonRpcRequest<'static> {
-    JsonRpcRequest {
+    ZeroCopyJsonRpcRequest {
         jsonrpc: "2.0".into(),
         method: Cow::Owned(method.to_string()),
         params,
@@ -38,9 +38,9 @@ async fn test_health_returns_valid_status() {
     assert!(response.error.is_none());
     let result = response.result.expect("result present");
     assert!(result["healthy"].as_bool().unwrap());
-    assert!(result["version"].as_str().is_some());
+    assert!(result["details"]["version"].as_str().is_some());
     assert!(result["uptime_secs"].as_u64().is_some());
-    assert!(result["error_count"].as_u64().is_some());
+    assert!(result["details"]["error_count"].as_u64().is_some());
 }
 
 #[tokio::test]

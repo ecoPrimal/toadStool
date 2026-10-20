@@ -81,7 +81,7 @@ mod tests {
     use std::sync::Arc;
 
     use super::DispatchHandler;
-    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
+    use crate::pure_jsonrpc::types::JsonRpcError;
     use crate::visualization_client::VisualizationClient;
 
     fn test_handler() -> DispatchHandler {

@@ -2,7 +2,7 @@
 //! Wave 8 trio-standard IPC contract tests — binary_b64, dispatch_dims, shader_info, timing.
 
 use super::{JsonRpcError, submit_params, test_handler};
-use crate::pure_jsonrpc::types::JsonRpcErrorExt;
+
 
 #[tokio::test]
 async fn dispatch_submit_accepts_binary_b64() {

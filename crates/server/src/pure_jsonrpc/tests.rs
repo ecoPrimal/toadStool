@@ -25,7 +25,7 @@ fn test_handler() -> JsonRpcHandler {
 }
 
 fn mk_request(method: &str, params: Option<serde_json::Value>, id: i32) -> ZeroCopyJsonRpcRequest<'static> {
-    JsonRpcRequest {
+    ZeroCopyJsonRpcRequest {
         jsonrpc: "2.0".into(),
         method: Cow::Owned(method.to_string()),
         params,
@@ -87,7 +87,7 @@ async fn test_health_via_handle_request() {
     assert!(response.error.is_none());
     let result = response.result.expect("result present");
     assert!(result["healthy"].as_bool().unwrap());
-    assert_eq!(result["version"], "test-1.0.0");
+    assert_eq!(result["details"]["version"], "test-1.0.0");
 }
 
 #[tokio::test]
@@ -116,7 +116,7 @@ async fn test_handle_method_dispatch_unknown() {
 #[tokio::test]
 async fn test_invalid_jsonrpc_version() {
     let handler = test_handler();
-    let request = JsonRpcRequest {
+    let request = ZeroCopyJsonRpcRequest {
         jsonrpc: "3.0".into(),
         method: Cow::Borrowed("toadstool.health"),
         params: None,
@@ -393,13 +393,13 @@ async fn test_health_error_count_incremented() {
     let response = handler.handle_request(&health_request).await;
     assert!(response.error.is_none());
     let result = response.result.expect("result present");
-    assert!(result["error_count"].as_u64().unwrap_or(0) >= 1);
+    assert!(result["details"]["error_count"].as_u64().unwrap_or(0) >= 1);
 }
 
 #[tokio::test]
 async fn test_request_id_null_when_missing() {
     let handler = test_handler();
-    let request = JsonRpcRequest {
+    let request = ZeroCopyJsonRpcRequest {
         jsonrpc: "2.0".into(),
         method: Cow::Borrowed("toadstool.health"),
         params: None,

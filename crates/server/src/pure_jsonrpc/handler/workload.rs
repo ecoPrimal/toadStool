@@ -184,7 +184,7 @@ mod tests {
     use base64::{Engine as _, engine::general_purpose::STANDARD};
 
     use super::WorkloadHandler;
-    use crate::pure_jsonrpc::types::{JsonRpcError, JsonRpcErrorExt};
+    use crate::pure_jsonrpc::types::JsonRpcError;
 
     fn handler(double: TestWorkloadDouble) -> WorkloadHandler {
         WorkloadHandler::new(Arc::new(WorkloadExecutorDispatch::TestDouble(double)))

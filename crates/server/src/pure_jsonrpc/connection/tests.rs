@@ -36,7 +36,7 @@ async fn test_process_request_valid_health() {
     let bytes = result.expect("ok");
     let resp: serde_json::Value = serde_json::from_slice(&bytes).expect("json");
     assert!(resp["result"]["healthy"].as_bool().is_some());
-    assert_eq!(resp["result"]["version"], "test-conn-1.0.0");
+    assert_eq!(resp["result"]["details"]["version"], "test-conn-1.0.0");
 }
 
 #[tokio::test]

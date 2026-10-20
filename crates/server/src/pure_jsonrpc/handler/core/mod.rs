@@ -187,14 +187,14 @@ mod tests {
             v["status"], "alive",
             "Wire Standard L1: status must be 'alive'"
         );
-        assert_eq!(v["version"], ver);
+        assert_eq!(v["details"]["version"], ver);
         assert!(v["uptime_secs"].as_u64().unwrap() >= 2);
-        assert_eq!(v["error_count"], 7);
+        assert_eq!(v["details"]["error_count"], 7);
         errors.fetch_add(1, Ordering::Relaxed);
         let v2 = health(&std::sync::Arc::from(ver), start, &errors)
             .await
             .expect("health ok");
-        assert_eq!(v2["error_count"], 8);
+        assert_eq!(v2["details"]["error_count"], 8);
         assert_eq!(v2["status"], "alive");
     }
 
