@@ -51,6 +51,7 @@ use crate::runtime_discovery::DiscoveryClient;
 use crate::{ToadStoolError, ToadStoolResult};
 
 /// Resolve a port from an environment variable, falling back to `default`.
+#[expect(dead_code, reason = "used by build_discovery_fallbacks, invoked at runtime not compile time")]
 fn resolve_env_port(env_var: &str, default: u16) -> u16 {
     std::env::var(env_var)
         .ok()
@@ -101,6 +102,7 @@ pub use cellmembrane_types::DiscoveryConfig;
     deprecated,
     reason = "legacy env var names used as backward-compat fallbacks"
 )]
+#[expect(dead_code, reason = "wired to cellmembrane-types DiscoveryConfig — will be called when engine starts")]
 pub(crate) fn build_discovery_fallbacks() -> HashMap<String, String> {
     let coordination_port = resolve_env_port(
         socket_env::TOADSTOOL_COORDINATION_PORT,

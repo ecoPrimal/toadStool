@@ -172,6 +172,7 @@ pub async fn execute_sovereign_command(_cmd: SovereignCommand) -> Result<()> {
 }
 
 #[cfg(unix)]
+/// Execute a sovereign sub-command (handoff, reattach, status, list).
 pub async fn execute_sovereign_command(cmd: SovereignCommand) -> Result<()> {
     match cmd {
         SovereignCommand::Handoff {
